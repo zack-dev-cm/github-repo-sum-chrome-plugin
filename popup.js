@@ -68,7 +68,7 @@ function fetchWithToken(url) {
       if (response.status === 403) {
         return response.json().then(data => {
           if (data && data.message && data.message.includes('API rate limit exceeded')) {
-            throw new Error('GitHub API rate limit exceeded. Please enter a valid GitHub token.');
+            throw new Error('GitHub API rate limit exceeded. Please enter a valid GitHub token. Take it from https://github.com/settings/tokens');
           } else {
             throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
           }
