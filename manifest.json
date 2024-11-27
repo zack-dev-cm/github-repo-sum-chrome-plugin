@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "GitHub Repo Summarizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Summarize and download code from GitHub repositories.",
-  "permissions": ["scripting", "activeTab", "storage", "tabs"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://api.github.com/*"],
   "icons": {
     "16": "icons/icon16.png",
