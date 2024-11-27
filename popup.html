@@ -1,142 +1,205 @@
 <!-- popup.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>GitHub Repo Summarizer</title>
   <style>
+    /* Reset and Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      width: 360px;
-      margin: 0;
-      padding: 15px;
-      box-sizing: border-box;
       background-color: #f0f2f5;
       color: #333;
+      width: 360px;
+      padding: 20px;
     }
     h2 {
-      margin-top: 0;
-      font-size: 20px;
+      font-size: 22px;
       color: #0366d6;
       text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Form Styles */
+    .form-group {
+      margin-bottom: 15px;
     }
     label {
       display: block;
-      margin-top: 10px;
       font-size: 14px;
+      margin-bottom: 5px;
     }
     input[type="text"],
     input[type="password"] {
       width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      box-sizing: border-box;
+      padding: 10px;
+      font-size: 14px;
       border: 1px solid #d1d5da;
-      border-radius: 6px;
+      border-radius: 4px;
       background-color: #fafbfc;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #0366d6;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.3);
+    }
+
+    /* Checkbox Styles */
+    .checkbox-group {
+      margin-top: 10px;
+    }
+    .checkbox-group label {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 10px;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Button Styles */
     button {
       width: 100%;
-      padding: 10px;
-      margin-top: 15px;
+      padding: 12px;
+      margin-top: 20px;
       background-color: #2ea44f;
       color: #fff;
       border: none;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 16px;
       cursor: pointer;
       font-weight: bold;
+      transition: background-color 0.2s;
     }
     button:hover {
       background-color: #22863a;
     }
+
+    /* Status and Error Messages */
     #status,
     #error {
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 14px;
-      padding: 10px;
+      padding: 12px;
       border-radius: 6px;
+      line-height: 1.5;
     }
     #status {
       color: #155724;
       background-color: #d4edda;
-      border-left: 5px solid #28a745;
+      border-left: 6px solid #28a745;
     }
     #error {
       color: #721c24;
       background-color: #f8d7da;
-      border-left: 5px solid #dc3545;
+      border-left: 6px solid #dc3545;
     }
-    #downloadLink {
-      display: block;
-      margin-top: 15px;
-      text-align: center;
-    }
-    #downloadLink a {
-      color: #0366d6;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    #downloadLink a:hover {
-      text-decoration: underline;
-    }
+
+    /* Loading Indicator */
     .loading {
       display: flex;
       align-items: center;
-      margin-top: 10px;
       justify-content: center;
+      margin-top: 20px;
     }
     .loading img {
       width: 24px;
       height: 24px;
       margin-right: 10px;
     }
-    #summaryPreview {
-      margin-top: 15px;
-      font-size: 12px;
-      background-color: #fff;
-      padding: 10px;
-      border: 1px solid #d1d5da;
-      border-radius: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      white-space: pre-wrap;
+    .loading span {
+      font-size: 14px;
+      color: #555;
     }
-    .checkbox-group {
-      margin-top: 10px;
+
+    /* Download Link */
+    #downloadLink {
+      margin-top: 20px;
+      text-align: center;
     }
-    .checkbox-group label {
-      font-weight: normal;
+    #downloadLink a {
+      color: #0366d6;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 15px;
+      transition: color 0.2s;
     }
-    .checkbox-group input[type="checkbox"] {
-      margin-right: 5px;
+    #downloadLink a:hover {
+      color: #024e8a;
+      text-decoration: underline;
     }
+
+    /* File Size Display */
     #fileSize {
       margin-top: 10px;
       font-size: 14px;
       color: #555;
       text-align: center;
     }
+
+    /* Summary Preview */
+    #summaryPreview {
+      margin-top: 20px;
+      font-size: 13px;
+      background-color: #fff;
+      padding: 12px;
+      border: 1px solid #d1d5da;
+      border-radius: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Scrollbar Styling */
+    #summaryPreview::-webkit-scrollbar {
+      width: 8px;
+    }
+    #summaryPreview::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    #summaryPreview::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    #summaryPreview::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
   <h2>GitHub Repo Summarizer</h2>
 
-  <label for="extensions">File Extensions (comma-separated, e.g., .py, .js):</label>
-  <input type="text" id="extensions" placeholder=".py, .js, .md" value=".py, .js, .md">
+  <div class="form-group">
+    <label for="extensions">File Extensions (comma-separated, e.g., .py, .js):</label>
+    <input type="text" id="extensions" placeholder=".py, .js, .md" value=".py, .js, .md">
+  </div>
 
-  <label for="token">GitHub Token (optional):</label>
-  <input type="password" id="token" placeholder="GitHub Token">
+  <div class="form-group">
+    <label for="token">GitHub Token (optional):</label>
+    <input type="password" id="token" placeholder="GitHub Token">
+  </div>
 
   <div class="checkbox-group">
     <label>Include in Summary:</label>
-    <div>
+    <label for="includeContent">
       <input type="checkbox" id="includeContent" checked>
-      <label for="includeContent">File Names and Content</label>
-    </div>
-    <div>
+      File Names and Content
+    </label>
+    <label for="includeTree">
       <input type="checkbox" id="includeTree" checked>
-      <label for="includeTree">Directory Tree Structure</label>
-    </div>
+      Directory Tree Structure
+    </label>
   </div>
 
   <button id="summarizeBtn">Summarize Repository</button>
