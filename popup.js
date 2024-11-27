@@ -236,5 +236,5 @@ function createDownloadableFile(content, repoName) {
   const downloadFileLink = document.getElementById('downloadFileLink');
   downloadFileLink.href = url;
   downloadFileLink.download = `${repoName} code summary.txt`;
-  downloadFileLink.textContent = `Download ${repoName} Code Summary`;
+  downloadFileLink.textContent = `Download ${repoName}_Code_Summary`;
 }
