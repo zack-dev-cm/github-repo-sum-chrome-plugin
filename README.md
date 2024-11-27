@@ -17,7 +17,7 @@
 1. **Clone or Download the Extension**:
 
    ```bash
-   git clone https://github.com/yourusername/github-repo-summarizer.git
+   git clone hhttps://github.com/zack-dev-cm/github-repo-sum-chrome-plugin
    ```
 
 2. **Open Chrome Extensions Page**:
