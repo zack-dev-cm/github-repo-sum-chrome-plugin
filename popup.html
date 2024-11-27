@@ -87,6 +87,16 @@
       height: 20px;
       margin-right: 10px;
     }
+    #summaryPreview {
+      margin-top: 15px;
+      font-size: 12px;
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
   </style>
 </head>
 <body>
@@ -111,6 +121,8 @@
   <div id="downloadLink" style="display:none;">
     <a href="#" id="downloadFileLink">Download Combined File</a>
   </div>
+
+  <div id="summaryPreview" style="display:none;"></div>
 
   <script src="popup.js"></script>
 </body>

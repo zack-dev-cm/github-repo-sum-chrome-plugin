@@ -1,6 +1,21 @@
 // popup.js
 
-document.getElementById('summarizeBtn').addEventListener('click', processRepo);
+document.addEventListener('DOMContentLoaded', () => {
+  loadToken();
+  document.getElementById('summarizeBtn').addEventListener('click', processRepo);
+});
+
+function loadToken() {
+  chrome.storage.local.get('githubToken', (data) => {
+    if (data.githubToken) {
+      document.getElementById('token').value = data.githubToken;
+    }
+  });
+}
+
+function saveToken(token) {
+  chrome.storage.local.set({ 'githubToken': token });
+}
 
 function processRepo() {
   const statusEl = document.getElementById('status');
@@ -8,12 +23,15 @@ function processRepo() {
   const loadingEl = document.getElementById('loading');
   const downloadLinkContainer = document.getElementById('downloadLink');
   const downloadFileLink = document.getElementById('downloadFileLink');
+  const summaryPreviewEl = document.getElementById('summaryPreview');
 
   // Reset UI elements
   statusEl.style.display = 'none';
   errorEl.style.display = 'none';
   loadingEl.style.display = 'flex';
   downloadLinkContainer.style.display = 'none';
+  summaryPreviewEl.style.display = 'none';
+  summaryPreviewEl.textContent = '';
 
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const tab = tabs[0];
@@ -21,6 +39,11 @@ function processRepo() {
     if (repoInfo) {
       const extensionsInput = document.getElementById('extensions').value;
       const extensions = extensionsInput.split(',').map(ext => ext.trim()).filter(ext => ext);
+      const tokenInput = document.getElementById('token').value.trim();
+      if (tokenInput) {
+        saveToken(tokenInput);
+      }
+
       fetchRepoTree(repoInfo.owner, repoInfo.repo)
         .then(files => {
           const codeFiles = filterCodeFiles(files, extensions);
@@ -30,11 +53,32 @@ function processRepo() {
           const combinedContent = buildCombinedContent(contents);
           const treeStructure = buildTreeStructure(contents);
           const finalContent = combinedContent + '\n\n===== File Tree =====\n' + treeStructure;
-          createDownloadableFile(finalContent);
+          createDownloadableFile(finalContent, repoInfo.repo);
           loadingEl.style.display = 'none';
           statusEl.textContent = 'File ready for download.';
           statusEl.style.display = 'block';
           downloadLinkContainer.style.display = 'block';
+
+          // Show summary preview (first 100 chars and last 100 chars)
+          let previewLength = 100;
+          let contentLength = finalContent.length;
+
+          let previewStart = finalContent.substring(0, Math.min(previewLength, contentLength));
+          let previewEnd = '';
+
+          if (contentLength > previewLength * 2) {
+            previewEnd = finalContent.substring(contentLength - previewLength);
+            summaryPreviewEl.textContent = previewStart + '\n\n...\n\n' + previewEnd;
+          } else if (contentLength > previewLength) {
+            // If content is between 100 and 200 characters, show the entire content
+            previewEnd = finalContent.substring(previewLength);
+            summaryPreviewEl.textContent = previewStart + previewEnd;
+          } else {
+            // Content is less than or equal to 100 characters
+            summaryPreviewEl.textContent = finalContent;
+          }
+
+          summaryPreviewEl.style.display = 'block';
         })
         .catch(error => {
           console.error('Error:', error);
@@ -68,7 +112,7 @@ function fetchWithToken(url) {
       if (response.status === 403) {
         return response.json().then(data => {
           if (data && data.message && data.message.includes('API rate limit exceeded')) {
-            throw new Error('GitHub API rate limit exceeded. Please enter a valid GitHub token. Take it from https://github.com/settings/tokens');
+            throw new Error('GitHub API rate limit exceeded. Please enter a valid GitHub token. Get one from https://github.com/settings/tokens');
           } else {
             throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
           }
@@ -186,11 +230,11 @@ function buildTreeStructure(filesContent) {
   return traverse(tree);
 }
 
-function createDownloadableFile(content) {
+function createDownloadableFile(content, repoName) {
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const downloadFileLink = document.getElementById('downloadFileLink');
   downloadFileLink.href = url;
-  downloadFileLink.download = 'combined_code_files_output.txt';
-  downloadFileLink.textContent = 'Download Combined File';
+  downloadFileLink.download = `${repoName} code summary.txt`;
+  downloadFileLink.textContent = `Download ${repoName} Code Summary`;
 }
