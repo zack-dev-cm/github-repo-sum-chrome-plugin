@@ -1,13 +1,22 @@
 {
-    "manifest_version": 3,
-    "name": "GitHub Repo Summarizer",
-    "version": "1.0",
-    "description": "Summarize the code of a GitHub repository.",
-    "permissions": ["scripting", "activeTab", "storage", "tabs"],
-    "host_permissions": ["https://api.github.com/*"],
-    "action": {
-      "default_popup": "popup.html",
-      "default_title": "Summarize Repo"
-    }
+  "manifest_version": 3,
+  "name": "GitHub Repo Summarizer",
+  "version": "1.0.0",
+  "description": "Summarize and download code from GitHub repositories.",
+  "permissions": ["scripting", "activeTab", "storage", "tabs"],
+  "host_permissions": ["https://api.github.com/*"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "GitHub Repo Summarizer"
   }
-  
+}
