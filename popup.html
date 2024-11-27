@@ -97,6 +97,12 @@
       overflow-y: auto;
       white-space: pre-wrap;
     }
+    .checkbox-group {
+      margin-top: 10px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -107,6 +113,18 @@
 
   <label for="token">GitHub Token (optional):</label>
   <input type="password" id="token" placeholder="GitHub Token">
+
+  <div class="checkbox-group">
+    <label>Include in Summary:</label>
+    <div>
+      <input type="checkbox" id="includeContent" checked>
+      <label for="includeContent">File Names and Content</label>
+    </div>
+    <div>
+      <input type="checkbox" id="includeTree" checked>
+      <label for="includeTree">Directory Tree Structure</label>
+    </div>
+  </div>
 
   <button id="summarizeBtn">Summarize Repository</button>
 

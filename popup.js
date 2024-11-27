@@ -44,15 +44,34 @@ function processRepo() {
         saveToken(tokenInput);
       }
 
+      // Get user selections
+      const includeContent = document.getElementById('includeContent').checked;
+      const includeTree = document.getElementById('includeTree').checked;
+
       fetchRepoTree(repoInfo.owner, repoInfo.repo)
         .then(files => {
           const codeFiles = filterCodeFiles(files, extensions);
           return fetchFilesContent(codeFiles);
         })
         .then(contents => {
-          const combinedContent = buildCombinedContent(contents);
-          const treeStructure = buildTreeStructure(contents);
-          const finalContent = combinedContent + '\n\n===== File Tree =====\n' + treeStructure;
+          let finalContent = '';
+          let combinedContent = '';
+          let treeStructure = '';
+
+          if (includeContent) {
+            combinedContent = buildCombinedContent(contents);
+            finalContent += combinedContent;
+          }
+
+          if (includeTree) {
+            treeStructure = buildTreeStructure(contents);
+            finalContent += '\n\n===== File Tree =====\n' + treeStructure;
+          }
+
+          if (!finalContent) {
+            finalContent = 'No content selected to include in the summary.';
+          }
+
           createDownloadableFile(finalContent, repoInfo.repo);
           loadingEl.style.display = 'none';
           statusEl.textContent = 'File ready for download.';
@@ -235,6 +254,6 @@ function createDownloadableFile(content, repoName) {
   const url = URL.createObjectURL(blob);
   const downloadFileLink = document.getElementById('downloadFileLink');
   downloadFileLink.href = url;
-  downloadFileLink.download = `${repoName} code summary.txt`;
-  downloadFileLink.textContent = `Download ${repoName}_Code_Summary`;
+  downloadFileLink.download = `${repoName}-code-summary.txt`;
+  downloadFileLink.textContent = `Download ${repoName} Code Summary`;
 }
