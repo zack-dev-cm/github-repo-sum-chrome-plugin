@@ -4,26 +4,114 @@
 <head>
   <title>GitHub Repo Summarizer</title>
   <style>
-    body { font-family: Arial, sans-serif; width: 300px; margin: 10px; }
-    #summary { white-space: pre-wrap; margin-top: 10px; max-height: 400px; overflow-y: auto; }
-    #status { color: green; }
-    #error { color: red; }
-    #downloadLink { margin-top: 10px; }
-    label { display: block; margin-top: 10px; }
-    input[type="text"] { width: 100%; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 350px;
+      margin: 0;
+      padding: 15px;
+      box-sizing: border-box;
+      background-color: #f5f5f5;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 15px;
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    #status,
+    #error {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #status {
+      color: #155724;
+      background-color: #d4edda;
+      padding: 10px;
+      border-left: 5px solid #28a745;
+      border-radius: 4px;
+    }
+    #error {
+      color: #721c24;
+      background-color: #f8d7da;
+      padding: 10px;
+      border-left: 5px solid #dc3545;
+      border-radius: 4px;
+    }
+    #downloadLink {
+      display: block;
+      margin-top: 15px;
+      text-align: center;
+    }
+    #downloadLink a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    #downloadLink a:hover {
+      text-decoration: underline;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .loading img {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
   <h2>GitHub Repo Summarizer</h2>
-  <button id="summarizeBtn">Summarize Repository</button>
-  <label for="extensions">File Extensions (comma-separated, e.g., .py,.js):</label>
-  <input type="text" id="extensions" placeholder=".py,.js,.md" value=".py,.js,.md">
+
+  <label for="extensions">File Extensions (comma-separated, e.g., .py, .js):</label>
+  <input type="text" id="extensions" placeholder=".py, .js, .md" value=".py, .js, .md">
+
   <label for="token">GitHub Token (optional):</label>
-  <input type="password" id="token" placeholder="GitHub Token (optional)">
-  <div id="status"></div>
-  <div id="error"></div>
-  <div id="summary"></div>
-  <a id="downloadLink" href="#" style="display:none;">Download Combined File</a>
+  <input type="password" id="token" placeholder="GitHub Token">
+
+  <button id="summarizeBtn">Summarize Repository</button>
+
+  <div id="status" style="display:none;"></div>
+  <div id="error" style="display:none;"></div>
+
+  <div class="loading" id="loading" style="display:none;">
+    <img src="spinner.gif" alt="Loading">
+    <span>Processing...</span>
+  </div>
+
+  <div id="downloadLink" style="display:none;">
+    <a href="#" id="downloadFileLink">Download Combined File</a>
+  </div>
+
   <script src="popup.js"></script>
 </body>
 </html>

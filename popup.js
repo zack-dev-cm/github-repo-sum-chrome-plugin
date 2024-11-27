@@ -5,13 +5,15 @@ document.getElementById('summarizeBtn').addEventListener('click', processRepo);
 function processRepo() {
   const statusEl = document.getElementById('status');
   const errorEl = document.getElementById('error');
-  const summaryEl = document.getElementById('summary');
-  const downloadLink = document.getElementById('downloadLink');
+  const loadingEl = document.getElementById('loading');
+  const downloadLinkContainer = document.getElementById('downloadLink');
+  const downloadFileLink = document.getElementById('downloadFileLink');
 
-  statusEl.textContent = 'Processing repository...';
-  errorEl.textContent = '';
-  summaryEl.textContent = '';
-  downloadLink.style.display = 'none';
+  // Reset UI elements
+  statusEl.style.display = 'none';
+  errorEl.style.display = 'none';
+  loadingEl.style.display = 'flex';
+  downloadLinkContainer.style.display = 'none';
 
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const tab = tabs[0];
@@ -29,17 +31,21 @@ function processRepo() {
           const treeStructure = buildTreeStructure(contents);
           const finalContent = combinedContent + '\n\n===== File Tree =====\n' + treeStructure;
           createDownloadableFile(finalContent);
+          loadingEl.style.display = 'none';
           statusEl.textContent = 'File ready for download.';
-          downloadLink.style.display = 'block';
+          statusEl.style.display = 'block';
+          downloadLinkContainer.style.display = 'block';
         })
         .catch(error => {
           console.error('Error:', error);
-          statusEl.textContent = '';
-          errorEl.textContent = 'Error: ' + error.message;
+          loadingEl.style.display = 'none';
+          errorEl.textContent = error.message;
+          errorEl.style.display = 'block';
         });
     } else {
-      statusEl.textContent = '';
+      loadingEl.style.display = 'none';
       errorEl.textContent = 'Not on a valid GitHub repository page.';
+      errorEl.style.display = 'block';
     }
   });
 }
@@ -56,7 +62,24 @@ function getRepoInfoFromURL(url) {
 function fetchWithToken(url) {
   const token = document.getElementById('token').value.trim();
   const headers = token ? { 'Authorization': `token ${token}` } : {};
-  return fetch(url, { headers });
+
+  return fetch(url, { headers })
+    .then(response => {
+      if (response.status === 403) {
+        return response.json().then(data => {
+          if (data && data.message && data.message.includes('API rate limit exceeded')) {
+            throw new Error('GitHub API rate limit exceeded. Please enter a valid GitHub token.');
+          } else {
+            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+          }
+        });
+      } else if (response.status === 401) {
+        throw new Error('Invalid GitHub token provided.');
+      } else if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      }
+      return response;
+    });
 }
 
 function fetchRepoTree(owner, repo) {
@@ -72,33 +95,65 @@ function fetchRepoTree(owner, repo) {
       if (treeData.truncated) {
         throw new Error('Repository tree is too large to fetch.');
       }
+      if (!treeData.tree || !Array.isArray(treeData.tree)) {
+        throw new Error('Unexpected data format received from GitHub API.');
+      }
       return treeData.tree;
+    })
+    .catch(error => {
+      if (error.message.includes('404')) {
+        throw new Error('Repository not found or is private.');
+      } else {
+        throw error;
+      }
     });
 }
 
 function filterCodeFiles(files, extensions) {
+  if (!files || !Array.isArray(files)) {
+    throw new Error('No files found in the repository.');
+  }
   return files.filter(item => {
     return item.type === 'blob' && extensions.some(ext => item.path.endsWith(ext));
   });
 }
 
 function fetchFilesContent(files) {
-  const MAX_FILE_SIZE = 100000; // 100 KB
+  if (!files || !Array.isArray(files) || files.length === 0) {
+    return Promise.resolve([]);
+  }
+
+  const MAX_FILE_SIZE = 500000; // 500 KB
   const fetches = files.map(file => {
     return fetchWithToken(file.url)
-      .then(response => response.json())
-      .then(blobData => {
-        if (blobData.size > MAX_FILE_SIZE) {
-          return null; // Skip large files
+      .then(response => {
+        if (!response.ok) {
+          console.warn(`Failed to fetch ${file.path}: ${response.status} ${response.statusText}`);
+          return null;
         }
-        const content = atob(blobData.content.replace(/\n/g, ''));
-        return { path: file.path, content };
+        return response.json();
+      })
+      .then(blobData => {
+        if (blobData && blobData.size <= MAX_FILE_SIZE && blobData.content) {
+          const content = atob(blobData.content.replace(/\n/g, ''));
+          return { path: file.path, content };
+        } else {
+          console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
+          return null;
+        }
+      })
+      .catch(error => {
+        console.warn(`Error fetching ${file.path}: ${error.message}`);
+        return null;
       });
   });
   return Promise.all(fetches).then(results => results.filter(item => item !== null));
 }
 
 function buildCombinedContent(filesContent) {
+  if (!filesContent || !Array.isArray(filesContent)) {
+    throw new Error('No file contents available.');
+  }
   let combinedContent = '';
   filesContent.forEach(file => {
     combinedContent += `\n===== ${file.path} =====\n${file.content}\n`;
@@ -134,9 +189,8 @@ function buildTreeStructure(filesContent) {
 function createDownloadableFile(content) {
   const blob = new Blob([content], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
-  const downloadLink = document.getElementById('downloadLink');
-  downloadLink.href = url;
-  downloadLink.download = 'combined_code_files_output.txt';
-  downloadLink.textContent = 'Download Combined File';
+  const downloadFileLink = document.getElementById('downloadFileLink');
+  downloadFileLink.href = url;
+  downloadFileLink.download = 'combined_code_files_output.txt';
+  downloadFileLink.textContent = 'Download Combined File';
 }
-
