@@ -61,8 +61,8 @@
 ![Extension Popup](screenshots/extension-popup.png)
 *The extension's popup window where you can initiate summarization.*
 
-![Summary Output](screenshots/summary-output.png)
-*An example of the generated summary displayed in the extension.*
+<!-- ![Summary Output](screenshots/summary-output.png)
+*An example of the generated summary displayed in the extension.* -->
 
 ## Configuration
 
