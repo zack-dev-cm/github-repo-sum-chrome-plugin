@@ -1,22 +1,29 @@
 <!-- popup.html -->
-
 <!DOCTYPE html>
 <html>
 <head>
   <title>GitHub Repo Summarizer</title>
   <style>
     body { font-family: Arial, sans-serif; width: 300px; margin: 10px; }
-    #summary { white-space: pre-wrap; margin-top: 10px; }
+    #summary { white-space: pre-wrap; margin-top: 10px; max-height: 400px; overflow-y: auto; }
     #status { color: green; }
     #error { color: red; }
+    #downloadLink { margin-top: 10px; }
+    label { display: block; margin-top: 10px; }
+    input[type="text"] { width: 100%; }
   </style>
 </head>
 <body>
   <h2>GitHub Repo Summarizer</h2>
   <button id="summarizeBtn">Summarize Repository</button>
+  <label for="extensions">File Extensions (comma-separated, e.g., .py,.js):</label>
+  <input type="text" id="extensions" placeholder=".py,.js,.md" value=".py,.js,.md">
+  <label for="token">GitHub Token (optional):</label>
+  <input type="password" id="token" placeholder="GitHub Token (optional)">
   <div id="status"></div>
   <div id="error"></div>
   <div id="summary"></div>
+  <a id="downloadLink" href="#" style="display:none;">Download Combined File</a>
   <script src="popup.js"></script>
 </body>
 </html>

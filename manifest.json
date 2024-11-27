@@ -3,17 +3,11 @@
     "name": "GitHub Repo Summarizer",
     "version": "1.0",
     "description": "Summarize the code of a GitHub repository.",
-    "permissions": ["scripting", "activeTab", "storage"],
+    "permissions": ["scripting", "activeTab", "storage", "tabs"],
     "host_permissions": ["https://api.github.com/*"],
     "action": {
       "default_popup": "popup.html",
       "default_title": "Summarize Repo"
-    },
-    "content_scripts": [
-      {
-        "matches": ["https://github.com/*/*"],
-        "js": ["content.js"]
-      }
-    ]
+    }
   }
   
