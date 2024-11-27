@@ -24,6 +24,7 @@ function processRepo() {
   const downloadLinkContainer = document.getElementById('downloadLink');
   const downloadFileLink = document.getElementById('downloadFileLink');
   const summaryPreviewEl = document.getElementById('summaryPreview');
+  const fileSizeEl = document.getElementById('fileSize');
 
   // Reset UI elements
   statusEl.style.display = 'none';
@@ -32,6 +33,7 @@ function processRepo() {
   downloadLinkContainer.style.display = 'none';
   summaryPreviewEl.style.display = 'none';
   summaryPreviewEl.textContent = '';
+  fileSizeEl.style.display = 'none';
 
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const tab = tabs[0];
@@ -77,6 +79,11 @@ function processRepo() {
           statusEl.textContent = 'File ready for download.';
           statusEl.style.display = 'block';
           downloadLinkContainer.style.display = 'block';
+
+          // Display file size
+          const fileSizeInKB = (new Blob([finalContent]).size / 1024).toFixed(2);
+          fileSizeEl.textContent = `File Size: ${fileSizeInKB} KB`;
+          fileSizeEl.style.display = 'block';
 
           // Show summary preview (first 100 chars and last 100 chars)
           let previewLength = 100;
