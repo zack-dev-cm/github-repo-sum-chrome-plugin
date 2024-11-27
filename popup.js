@@ -25,6 +25,7 @@ function processRepo() {
   const downloadFileLink = document.getElementById('downloadFileLink');
   const summaryPreviewEl = document.getElementById('summaryPreview');
   const fileSizeEl = document.getElementById('fileSize');
+  const tokenCountEl = document.getElementById('tokenCount');
 
   // Reset UI elements
   statusEl.style.display = 'none';
@@ -34,6 +35,7 @@ function processRepo() {
   summaryPreviewEl.style.display = 'none';
   summaryPreviewEl.textContent = '';
   fileSizeEl.style.display = 'none';
+  tokenCountEl.style.display = 'none';
 
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const tab = tabs[0];
@@ -84,6 +86,11 @@ function processRepo() {
           const fileSizeInKB = (new Blob([finalContent]).size / 1024).toFixed(2);
           fileSizeEl.textContent = `File Size: ${fileSizeInKB} KB`;
           fileSizeEl.style.display = 'block';
+
+          // Calculate and display token count
+          const estimatedTokens = estimateTokenCount(finalContent);
+          tokenCountEl.textContent = `Estimated Token Count: ${estimatedTokens}`;
+          tokenCountEl.style.display = 'block';
 
           // Show summary preview (first 100 chars and last 100 chars)
           let previewLength = 100;
@@ -263,4 +270,11 @@ function createDownloadableFile(content, repoName) {
   downloadFileLink.href = url;
   downloadFileLink.download = `${repoName}-code-summary.txt`;
   downloadFileLink.textContent = `Download ${repoName} Code Summary`;
+}
+
+function estimateTokenCount(text) {
+  // Estimate token count for LLMs (approximate)
+  // Assuming average of 4 characters per token
+  const tokens = Math.ceil(text.length / 4);
+  return tokens;
 }
