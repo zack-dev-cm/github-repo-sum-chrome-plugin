@@ -13,7 +13,7 @@ function loadSettings() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
-      chrome.storage.local.get([repoKey, 'githubToken'], (data) => {
+      chrome.storage.local.get([repoKey, 'githubToken', 'saveSettings'], (data) => {
         if (data.githubToken) {
           document.getElementById('token').value = data.githubToken;
         }
@@ -23,6 +23,10 @@ function loadSettings() {
           document.getElementById('maxChars').value = settings.maxChars || '0';
           document.getElementById('includeContent').checked = settings.includeContent !== false;
           document.getElementById('includeTree').checked = settings.includeTree !== false;
+          document.getElementById('saveSettings').checked = settings.saveSettings !== false; // Load saveSettings state
+        } else {
+          // If no settings saved for this repo, ensure saveSettings is checked by default
+          document.getElementById('saveSettings').checked = true;
         }
       });
     }
@@ -31,6 +35,8 @@ function loadSettings() {
 
 function saveSettings() {
   const saveSettingsChecked = document.getElementById('saveSettings').checked;
+  // Save the state of the 'saveSettings' checkbox regardless
+  chrome.storage.local.set({ 'saveSettings': saveSettingsChecked });
   if (!saveSettingsChecked) return;
 
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -42,7 +48,8 @@ function saveSettings() {
         extensions: document.getElementById('extensions').value,
         maxChars: document.getElementById('maxChars').value,
         includeContent: document.getElementById('includeContent').checked,
-        includeTree: document.getElementById('includeTree').checked
+        includeTree: document.getElementById('includeTree').checked,
+        saveSettings: saveSettingsChecked // Save the state of the checkbox
       };
       chrome.storage.local.set({ [repoKey]: settings }, () => {
         console.log('Settings saved for', repoKey);
@@ -76,8 +83,10 @@ function preScanRepo() {
         .then(files => {
           const extensions = new Set();
           files.forEach(file => {
-            const ext = getFileExtension(file.path);
-            if (ext) extensions.add(ext);
+            if (file.type === 'blob') { // Only consider files, not directories
+              const ext = getFileExtension(file.path);
+              if (ext) extensions.add(ext);
+            }
           });
           const extensionsArray = Array.from(extensions).sort();
           availableExtensionsEl.innerHTML = '';
@@ -86,7 +95,11 @@ function preScanRepo() {
             checkbox.type = 'checkbox';
             checkbox.value = ext;
             checkbox.className = 'extension-checkbox';
-            checkbox.checked = document.getElementById('extensions').value.includes(ext);
+
+            // Check if the extension is already in the extensions field
+            const currentExtensions = document.getElementById('extensions').value;
+            checkbox.checked = currentExtensions.includes(ext);
+
             checkbox.addEventListener('change', updateExtensionsField);
 
             const label = document.createElement('label');
@@ -409,15 +422,16 @@ function estimateTokenCount(text) {
 }
 
 function getFileExtension(filename) {
-  const parts = filename.split('.');
-  if (parts.length > 1) {
-    return '.' + parts.pop();
-  } else if (filename.includes('/')) {
-    // Handle files without extensions (e.g., Dockerfile)
-    return filename.substring(filename.lastIndexOf('/') + 1);
-  } else {
-    return filename;
+  const basename = filename.split(/[\\/]/).pop(); // Extract the file name from the path
+  const dotIndex = basename.lastIndexOf('.');
+  if (dotIndex === -1) {
+    // No dot found, check for special files like 'Dockerfile'
+    if (basename === 'Dockerfile') {
+      return 'Dockerfile';
+    }
+    return ''; // No extension
   }
+  return basename.slice(dotIndex); // Return the extension including the dot
 }
 
 function saveToken(token) {
