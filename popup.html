@@ -199,21 +199,28 @@
 <body>
   <h2>GitHub Repo Summarizer</h2>
 
-  <div class="checkbox-group">
-    <label>File Extensions to Include:</label>
-    <div id="extensionsContainer">
-      <!-- Extensions will be dynamically loaded here -->
-    </div>
+  <div class="form-group">
+    <label for="extensions">File Extensions to Include:</label>
+    <input type="text" id="extensions" placeholder=".py, .js, .md" value=".js, .py, .java, .cpp, .md">
+  </div>
+
+  <div class="form-group">
+    <input type="checkbox" id="saveSettings">
+    <label for="saveSettings">Save settings for this repository</label>
   </div>
 
   <button id="advancedSettingsBtn">Advanced Settings</button>
 
   <div id="advancedSettings">
+    <button id="preScanBtn">Pre-scan Repository</button>
+    <div class="form-group">
+      <label for="availableExtensions">Available Extensions in Repository:</label>
+      <div id="availableExtensions"></div>
+    </div>
     <div class="form-group">
       <label for="maxChars">Max Characters per File (0 for no limit):</label>
       <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
     </div>
-    <button id="saveSettingsBtn">Save Settings</button>
   </div>
 
   <div class="form-group">

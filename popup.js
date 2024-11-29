@@ -1,21 +1,54 @@
 // popup.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadToken();
+  loadSettings();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
+  document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
 });
 
-function loadToken() {
-  chrome.storage.local.get('githubToken', (data) => {
-    if (data.githubToken) {
-      document.getElementById('token').value = data.githubToken;
+function loadSettings() {
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    const tab = tabs[0];
+    const repoInfo = getRepoInfoFromURL(tab.url);
+    if (repoInfo) {
+      const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
+      chrome.storage.local.get([repoKey, 'githubToken'], (data) => {
+        if (data.githubToken) {
+          document.getElementById('token').value = data.githubToken;
+        }
+        if (data[repoKey]) {
+          const settings = data[repoKey];
+          document.getElementById('extensions').value = settings.extensions || '.js, .py, .java, .cpp, .md';
+          document.getElementById('maxChars').value = settings.maxChars || '0';
+          document.getElementById('includeContent').checked = settings.includeContent !== false;
+          document.getElementById('includeTree').checked = settings.includeTree !== false;
+        }
+      });
     }
   });
 }
 
-function saveToken(token) {
-  chrome.storage.local.set({ 'githubToken': token });
+function saveSettings() {
+  const saveSettingsChecked = document.getElementById('saveSettings').checked;
+  if (!saveSettingsChecked) return;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    const tab = tabs[0];
+    const repoInfo = getRepoInfoFromURL(tab.url);
+    if (repoInfo) {
+      const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
+      const settings = {
+        extensions: document.getElementById('extensions').value,
+        maxChars: document.getElementById('maxChars').value,
+        includeContent: document.getElementById('includeContent').checked,
+        includeTree: document.getElementById('includeTree').checked
+      };
+      chrome.storage.local.set({ [repoKey]: settings }, () => {
+        console.log('Settings saved for', repoKey);
+      });
+    }
+  });
 }
 
 function toggleAdvancedSettings() {
@@ -27,6 +60,65 @@ function toggleAdvancedSettings() {
     advancedSettings.style.display = 'none';
     document.getElementById('advancedSettingsBtn').textContent = 'Advanced Settings';
   }
+}
+
+function preScanRepo() {
+  const errorEl = document.getElementById('error');
+  errorEl.style.display = 'none';
+  const availableExtensionsEl = document.getElementById('availableExtensions');
+  availableExtensionsEl.innerHTML = 'Scanning...';
+
+  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+    const tab = tabs[0];
+    const repoInfo = getRepoInfoFromURL(tab.url);
+    if (repoInfo) {
+      fetchRepoTree(repoInfo.owner, repoInfo.repo)
+        .then(files => {
+          const extensions = new Set();
+          files.forEach(file => {
+            const ext = getFileExtension(file.path);
+            if (ext) extensions.add(ext);
+          });
+          const extensionsArray = Array.from(extensions).sort();
+          availableExtensionsEl.innerHTML = '';
+          extensionsArray.forEach(ext => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = ext;
+            checkbox.className = 'extension-checkbox';
+            checkbox.checked = document.getElementById('extensions').value.includes(ext);
+            checkbox.addEventListener('change', updateExtensionsField);
+
+            const label = document.createElement('label');
+            label.style.display = 'block';
+            label.style.fontSize = '14px';
+            label.style.cursor = 'pointer';
+
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + ext));
+            availableExtensionsEl.appendChild(label);
+          });
+        })
+        .catch(error => {
+          console.error('Error during pre-scan:', error);
+          availableExtensionsEl.innerHTML = 'Error fetching extensions.';
+          errorEl.textContent = error.message;
+          errorEl.style.display = 'block';
+        });
+    } else {
+      availableExtensionsEl.innerHTML = '';
+      errorEl.textContent = 'Not on a valid GitHub repository page.';
+      errorEl.style.display = 'block';
+    }
+  });
+}
+
+function updateExtensionsField() {
+  const checkboxes = document.querySelectorAll('#availableExtensions .extension-checkbox');
+  const selectedExtensions = Array.from(checkboxes)
+    .filter(checkbox => checkbox.checked)
+    .map(checkbox => checkbox.value);
+  document.getElementById('extensions').value = selectedExtensions.join(', ');
 }
 
 function processRepo() {
@@ -53,19 +145,12 @@ function processRepo() {
     const tab = tabs[0];
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
-      // Get selected extensions from checkboxes
-      const extensionCheckboxes = document.querySelectorAll('.extension-checkbox');
-      let extensions = Array.from(extensionCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
-
-      // Include custom extensions from advanced settings
-      const customExtensionsInput = document.getElementById('customExtensions').value;
-      const customExtensions = customExtensionsInput
+      // Get extensions from the text field
+      let extensionsInput = document.getElementById('extensions').value;
+      let extensions = extensionsInput
         .split(',')
         .map(ext => ext.trim())
         .filter(ext => ext);
-      extensions = extensions.concat(customExtensions);
 
       // Get max characters per file
       const maxChars = parseInt(document.getElementById('maxChars').value) || 0;
@@ -78,6 +163,9 @@ function processRepo() {
       // Get user selections
       const includeContent = document.getElementById('includeContent').checked;
       const includeTree = document.getElementById('includeTree').checked;
+
+      // Save settings if checked
+      saveSettings();
 
       let repoFiles = []; // Declare repoFiles variable in outer scope
 
@@ -318,4 +406,20 @@ function estimateTokenCount(text) {
   // Assuming average of 4 characters per token
   const tokens = Math.ceil(text.length / 4);
   return tokens;
+}
+
+function getFileExtension(filename) {
+  const parts = filename.split('.');
+  if (parts.length > 1) {
+    return '.' + parts.pop();
+  } else if (filename.includes('/')) {
+    // Handle files without extensions (e.g., Dockerfile)
+    return filename.substring(filename.lastIndexOf('/') + 1);
+  } else {
+    return filename;
+  }
+}
+
+function saveToken(token) {
+  chrome.storage.local.set({ 'githubToken': token });
 }
