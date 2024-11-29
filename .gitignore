@@ -1,0 +1,87 @@
+# Node modules (if you use Node.js or npm)
+node_modules/
+
+# Build artifacts
+github-repo-sum-chrome-plugin.zip
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files and directories
+tmp/
+temp/
+*.tmp
+*.swp
+
+# IDE or editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# MacOS metadata files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows thumbnail cache files
+Thumbs.db
+ehthumbs.db
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Visual Studio Code files
+.history/
+
+# Git hook scripts (if stored outside .git/hooks/)
+.githooks/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# SASS cache files
+.sass-cache/
+
+# Environment variables file
+.env
+
+# Yarn lock file (if not using Yarn)
+yarn.lock
+
+# NPM package lock file (if not using NPM)
+package-lock.json
+
+# Other compressed archives
+*.zip
+*.tar.gz
+*.rar
+
+# Python cache files (if you have any Python scripts)
+__pycache__/
+*.pyc
+
+# Exclude the zip-extension script if you don't want it tracked
+zip-extension.sh
+
+# Exclude the post-commit Git hook script
+.githooks/post-commit
+
+# Exclude the hooks directory if you store hooks in the repository
+hooks/
+
+# Exclude any files or directories you don't want to commit
+# Add them here
+
