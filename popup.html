@@ -199,66 +199,54 @@
 <body>
   <h2>GitHub Repo Summarizer</h2>
 
-  <div class="checkbox-group">
-    <label>File Extensions to Include:</label>
-    <label>
-      <input type="checkbox" class="extension-checkbox" value=".js" checked>
-      .js
-    </label>
-    <label>
-      <input type="checkbox" class="extension-checkbox" value=".py" checked>
-      .py
-    </label>
-    <label>
-      <input type="checkbox" class="extension-checkbox" value=".java" checked>
-      .java
-    </label>
-    <label>
-      <input type="checkbox" class="extension-checkbox" value=".cpp">
-      .cpp
-    </label>
-    <label>
-      <input type="checkbox" class="extension-checkbox" value=".md">
-      .md
-    </label>
-    <label>
-      <input type="checkbox" class="extension-checkbox" value="Dockerfile">
-      Dockerfile
-    </label>
-    <!-- Add more common extensions as needed -->
-  </div>
-
-  <button id="advancedSettingsBtn">Advanced Settings</button>
-
-  <div id="advancedSettings">
-    <div class="form-group">
-      <label for="customExtensions">Custom File Extensions (comma-separated):</label>
-      <input type="text" id="customExtensions" placeholder=".go, .rs">
-    </div>
-    <div class="form-group">
-      <label for="maxChars">Max Characters per File (0 for no limit):</label>
-      <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
-    </div>
-  </div>
-
   <div class="form-group">
     <label for="token">GitHub Token (optional):</label>
     <input type="password" id="token" placeholder="GitHub Token">
   </div>
 
-  <div class="checkbox-group">
-    <label>Include in Summary:</label>
-    <label for="includeContent">
-      <input type="checkbox" id="includeContent" checked>
-      File Names and Content
-    </label>
-    <label for="includeTree">
-      <input type="checkbox" id="includeTree" checked>
-      Directory Tree Structure
-    </label>
-  </div>
+  <button id="loadExtensionsBtn">Load File Extensions</button>
 
-  <button id="summarizeBtn">Summarize Repository</button>
+  <div id="extensionsContainer" style="display:none;">
+    <div class="checkbox-group" id="extensionsGroup">
+      <label>File Extensions to Include:</label>
+      <!-- Extensions checkboxes will be dynamically added here -->
+    </div>
+
+    <button id="advancedSettingsBtn">Advanced Settings</button>
+
+    <div id="advancedSettings">
+      <div class="form-group">
+        <label for="maxFileSize">Max File Size in KB (0 for no limit):</label>
+        <input type="number" id="maxFileSize" min="0" placeholder="e.g., 500" value="0">
+      </div>
+      <div class="form-group">
+        <label for="maxChars">Max Characters per File (0 for no limit):</label>
+        <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
+      </div>
+      <div class="form-group">
+        <label for="lengthyFilesAction">Action for Lengthy Files:</label>
+        <select id="lengthyFilesAction">
+          <option value="include">Include Full Content</option>
+          <option value="truncate">Truncate Content</option>
+          <option value="exclude">Exclude from Summary</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="checkbox-group">
+      <label>Include in Summary:</label>
+      <label for="includeContent">
+        <input type="checkbox" id="includeContent" checked>
+        File Names and Content
+      </label>
+      <label for="includeTree">
+        <input type="checkbox" id="includeTree" checked>
+        Directory Tree Structure
+      </label>
+    </div>
+
+    <button id="summarizeBtn">Summarize Repository</button>
+  </div>
 
   <div id="status" style="display:none;"></div>
   <div id="error" style="display:none;"></div>
