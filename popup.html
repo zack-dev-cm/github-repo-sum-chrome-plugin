@@ -199,54 +199,41 @@
 <body>
   <h2>GitHub Repo Summarizer</h2>
 
+  <div class="checkbox-group">
+    <label>File Extensions to Include:</label>
+    <div id="extensionsContainer">
+      <!-- Extensions will be dynamically loaded here -->
+    </div>
+  </div>
+
+  <button id="advancedSettingsBtn">Advanced Settings</button>
+
+  <div id="advancedSettings">
+    <div class="form-group">
+      <label for="maxChars">Max Characters per File (0 for no limit):</label>
+      <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
+    </div>
+    <button id="saveSettingsBtn">Save Settings</button>
+  </div>
+
   <div class="form-group">
     <label for="token">GitHub Token (optional):</label>
     <input type="password" id="token" placeholder="GitHub Token">
   </div>
 
-  <button id="loadExtensionsBtn">Load File Extensions</button>
-
-  <div id="extensionsContainer" style="display:none;">
-    <div class="checkbox-group" id="extensionsGroup">
-      <label>File Extensions to Include:</label>
-      <!-- Extensions checkboxes will be dynamically added here -->
-    </div>
-
-    <button id="advancedSettingsBtn">Advanced Settings</button>
-
-    <div id="advancedSettings">
-      <div class="form-group">
-        <label for="maxFileSize">Max File Size in KB (0 for no limit):</label>
-        <input type="number" id="maxFileSize" min="0" placeholder="e.g., 500" value="0">
-      </div>
-      <div class="form-group">
-        <label for="maxChars">Max Characters per File (0 for no limit):</label>
-        <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
-      </div>
-      <div class="form-group">
-        <label for="lengthyFilesAction">Action for Lengthy Files:</label>
-        <select id="lengthyFilesAction">
-          <option value="include">Include Full Content</option>
-          <option value="truncate">Truncate Content</option>
-          <option value="exclude">Exclude from Summary</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="checkbox-group">
-      <label>Include in Summary:</label>
-      <label for="includeContent">
-        <input type="checkbox" id="includeContent" checked>
-        File Names and Content
-      </label>
-      <label for="includeTree">
-        <input type="checkbox" id="includeTree" checked>
-        Directory Tree Structure
-      </label>
-    </div>
-
-    <button id="summarizeBtn">Summarize Repository</button>
+  <div class="checkbox-group">
+    <label>Include in Summary:</label>
+    <label for="includeContent">
+      <input type="checkbox" id="includeContent" checked>
+      File Names and Content
+    </label>
+    <label for="includeTree">
+      <input type="checkbox" id="includeTree" checked>
+      Directory Tree Structure
+    </label>
   </div>
+
+  <button id="summarizeBtn">Summarize Repository</button>
 
   <div id="status" style="display:none;"></div>
   <div id="error" style="display:none;"></div>
