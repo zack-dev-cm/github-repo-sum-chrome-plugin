@@ -79,8 +79,11 @@ function processRepo() {
       const includeContent = document.getElementById('includeContent').checked;
       const includeTree = document.getElementById('includeTree').checked;
 
+      let repoFiles = []; // Declare repoFiles variable in outer scope
+
       fetchRepoTree(repoInfo.owner, repoInfo.repo)
         .then(files => {
+          repoFiles = files; // Store files for later use
           const codeFiles = filterCodeFiles(files, extensions);
           return fetchFilesContent(codeFiles, maxChars);
         })
@@ -95,7 +98,7 @@ function processRepo() {
           }
 
           if (includeTree) {
-            treeStructure = buildTreeStructure(files); // Use all files for tree
+            treeStructure = buildTreeStructure(repoFiles); // Use repoFiles instead of files
             finalContent += '\n\n===== File Tree =====\n' + treeStructure;
           }
 
