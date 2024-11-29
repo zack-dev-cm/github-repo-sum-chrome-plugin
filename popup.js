@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   loadToken();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
+  document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
 });
 
 function loadToken() {
@@ -15,6 +16,17 @@ function loadToken() {
 
 function saveToken(token) {
   chrome.storage.local.set({ 'githubToken': token });
+}
+
+function toggleAdvancedSettings() {
+  const advancedSettings = document.getElementById('advancedSettings');
+  if (advancedSettings.style.display === 'none' || advancedSettings.style.display === '') {
+    advancedSettings.style.display = 'block';
+    document.getElementById('advancedSettingsBtn').textContent = 'Hide Advanced Settings';
+  } else {
+    advancedSettings.style.display = 'none';
+    document.getElementById('advancedSettingsBtn').textContent = 'Advanced Settings';
+  }
 }
 
 function processRepo() {
@@ -41,8 +53,23 @@ function processRepo() {
     const tab = tabs[0];
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
-      const extensionsInput = document.getElementById('extensions').value;
-      const extensions = extensionsInput.split(',').map(ext => ext.trim()).filter(ext => ext);
+      // Get selected extensions from checkboxes
+      const extensionCheckboxes = document.querySelectorAll('.extension-checkbox');
+      let extensions = Array.from(extensionCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+
+      // Include custom extensions from advanced settings
+      const customExtensionsInput = document.getElementById('customExtensions').value;
+      const customExtensions = customExtensionsInput
+        .split(',')
+        .map(ext => ext.trim())
+        .filter(ext => ext);
+      extensions = extensions.concat(customExtensions);
+
+      // Get max characters per file
+      const maxChars = parseInt(document.getElementById('maxChars').value) || 0;
+
       const tokenInput = document.getElementById('token').value.trim();
       if (tokenInput) {
         saveToken(tokenInput);
@@ -55,7 +82,7 @@ function processRepo() {
       fetchRepoTree(repoInfo.owner, repoInfo.repo)
         .then(files => {
           const codeFiles = filterCodeFiles(files, extensions);
-          return fetchFilesContent(codeFiles);
+          return fetchFilesContent(codeFiles, maxChars);
         })
         .then(contents => {
           let finalContent = '';
@@ -68,7 +95,7 @@ function processRepo() {
           }
 
           if (includeTree) {
-            treeStructure = buildTreeStructure(contents);
+            treeStructure = buildTreeStructure(files); // Use all files for tree
             finalContent += '\n\n===== File Tree =====\n' + treeStructure;
           }
 
@@ -191,11 +218,16 @@ function filterCodeFiles(files, extensions) {
     throw new Error('No files found in the repository.');
   }
   return files.filter(item => {
-    return item.type === 'blob' && extensions.some(ext => item.path.endsWith(ext));
+    return item.type === 'blob' && extensions.some(ext => {
+      if (ext === 'Dockerfile') {
+        return item.path.endsWith('Dockerfile');
+      }
+      return item.path.endsWith(ext);
+    });
   });
 }
 
-function fetchFilesContent(files) {
+function fetchFilesContent(files, maxChars) {
   if (!files || !Array.isArray(files) || files.length === 0) {
     return Promise.resolve([]);
   }
@@ -212,7 +244,13 @@ function fetchFilesContent(files) {
       })
       .then(blobData => {
         if (blobData && blobData.size <= MAX_FILE_SIZE && blobData.content) {
-          const content = atob(blobData.content.replace(/\n/g, ''));
+          let content = atob(blobData.content.replace(/\n/g, ''));
+          // Truncate content if maxChars is set
+          if (maxChars > 0 && content.length > maxChars * 2) {
+            const startContent = content.substring(0, maxChars);
+            const endContent = content.substring(content.length - maxChars);
+            content = startContent + '\n\n...\n\n' + endContent;
+          }
           return { path: file.path, content };
         } else {
           console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
@@ -238,9 +276,9 @@ function buildCombinedContent(filesContent) {
   return combinedContent;
 }
 
-function buildTreeStructure(filesContent) {
+function buildTreeStructure(files) {
   const tree = {};
-  filesContent.forEach(file => {
+  files.forEach(file => {
     const parts = file.path.split('/');
     let currentLevel = tree;
     parts.forEach(part => {
