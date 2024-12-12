@@ -17,6 +17,8 @@
       color: #333;
       width: 360px;
       padding: 20px;
+      overflow-y: auto; /* Enable vertical scrolling */
+      max-height: 600px; /* Set a maximum height for the popup */
     }
     h2 {
       font-size: 22px;
@@ -36,7 +38,8 @@
     }
     input[type="text"],
     input[type="password"],
-    input[type="number"] {
+    input[type="number"],
+    textarea {
       width: 100%;
       padding: 10px;
       font-size: 14px;
@@ -47,7 +50,8 @@
     }
     input[type="text"]:focus,
     input[type="password"]:focus,
-    input[type="number"]:focus {
+    input[type="number"]:focus,
+    textarea:focus {
       border-color: #0366d6;
       outline: none;
       box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.3);
@@ -194,6 +198,28 @@
     #summaryPreview::-webkit-scrollbar-thumb:hover {
       background: #555;
     }
+
+    /* Feedback Section */
+    #feedbackSection {
+      margin-top: 20px;
+      border-top: 1px solid #d1d5da;
+      padding-top: 20px;
+    }
+    #feedbackSection h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #0366d6;
+    }
+    #feedbackSection textarea {
+      resize: vertical;
+      height: 80px;
+    }
+    #submitFeedbackBtn {
+      background-color: #0366d6;
+    }
+    #submitFeedbackBtn:hover {
+      background-color: #024e8a;
+    }
   </style>
 </head>
 <body>
@@ -216,7 +242,7 @@
     <button id="preScanBtn">Pre-scan Repository</button>
     <div class="form-group">
       <label for="availableExtensions">Available Extensions in Repository:</label>
-      <div id="availableExtensions"></div>
+      <div id="availableExtensions">Click "Pre-scan Repository" to load extensions.</div>
     </div>
     <div class="form-group">
       <label for="maxChars">Max Characters per File (0 for no limit):</label>
@@ -259,6 +285,16 @@
   <div id="tokenCount" class="info-display" style="display:none;"></div>
 
   <div id="summaryPreview" style="display:none;"></div>
+
+  <!-- Feedback Section -->
+  <div id="feedbackSection">
+    <h3>We Value Your Feedback</h3>
+    <div class="form-group">
+      <label for="feedback">Tell us what features you'd like to see or what you don't like:</label>
+      <textarea id="feedback" placeholder="Your feedback here..."></textarea>
+    </div>
+    <button id="submitFeedbackBtn">Submit Feedback</button>
+  </div>
 
   <script src="popup.js"></script>
 </body>
