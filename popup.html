@@ -220,6 +220,41 @@
     #submitFeedbackBtn:hover {
       background-color: #024e8a;
     }
+    #directoriesContainer {
+      max-height: 150px;
+      overflow-y: auto;
+      border: 1px solid #d1d5da;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 4px;
+    }
+    #directoriesContainer label {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+    #directoriesContainer input[type="checkbox"] {
+      margin-right: 10px;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Scrollbar Styling for Directories */
+    #directoriesContainer::-webkit-scrollbar {
+      width: 8px;
+    }
+    #directoriesContainer::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    #directoriesContainer::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    #directoriesContainer::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
   </style>
 </head>
 <body>
@@ -247,6 +282,11 @@
     <div class="form-group">
       <label for="maxChars">Max Characters per File (0 for no limit):</label>
       <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
+    </div>
+    <!-- New Directory Selection Section -->
+    <div class="form-group">
+      <label for="directories">Select Directories to Include:</label>
+      <div id="directoriesContainer">Click "Pre-scan Repository" to load directories.</div>
     </div>
   </div>
 

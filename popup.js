@@ -10,15 +10,46 @@ function escapeRegExp(string) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadSettings();
+  initializeExtension();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
+  document.getElementById('saveSettingsBtn')?.addEventListener('click', saveSettings); // Optional: If there's a save button
 });
 
 /**
- * Load settings from Chrome storage and populate the form fields.
+ * Initialize the extension by loading token and settings.
+ */
+async function initializeExtension() {
+  await loadToken();
+  loadSettings();
+}
+
+/**
+ * Load GitHub token from Chrome storage.
+ */
+function loadToken() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get('githubToken', (data) => {
+      if (data.githubToken) {
+        document.getElementById('token').value = data.githubToken;
+      }
+      resolve();
+    });
+  });
+}
+
+/**
+ * Save GitHub token to Chrome storage.
+ * @param {string} token - The GitHub Personal Access Token.
+ */
+function saveToken(token) {
+  chrome.storage.local.set({ 'githubToken': token });
+}
+
+/**
+ * Load user settings from Chrome storage and apply to the UI.
  */
 function loadSettings() {
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -37,6 +68,7 @@ function loadSettings() {
           document.getElementById('includeContent').checked = settings.includeContent !== false;
           document.getElementById('includeTree').checked = settings.includeTree !== false;
           document.getElementById('saveSettings').checked = settings.saveSettings !== false; // Load saveSettings state
+          loadSelectedDirectories(settings.selectedDirectories || []);
         } else {
           // If no settings saved for this repo, ensure saveSettings is checked by default
           document.getElementById('saveSettings').checked = true;
@@ -60,15 +92,18 @@ function saveSettings() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
+      const selectedDirectories = getSelectedDirectories();
       const settings = {
         extensions: document.getElementById('extensions').value,
         maxChars: document.getElementById('maxChars').value,
         includeContent: document.getElementById('includeContent').checked,
         includeTree: document.getElementById('includeTree').checked,
-        saveSettings: saveSettingsChecked // Save the state of the checkbox
+        saveSettings: saveSettingsChecked, // Save the state of the checkbox
+        selectedDirectories: selectedDirectories // Save selected directories
       };
       chrome.storage.local.set({ [repoKey]: settings }, () => {
         console.log('Settings saved for', repoKey);
+        alert('Settings saved successfully.');
       });
     }
   });
@@ -113,13 +148,15 @@ function displayStatus(message) {
 }
 
 /**
- * Pre-scan the repository to fetch and display available file extensions.
+ * Pre-scan the repository to fetch and display available file extensions and directories.
  */
 async function preScanRepo() {
   const errorEl = document.getElementById('error');
   const availableExtensionsEl = document.getElementById('availableExtensions');
+  const directoriesContainerEl = document.getElementById('directoriesContainer');
   errorEl.style.display = 'none';
   availableExtensionsEl.innerHTML = 'Scanning...';
+  directoriesContainerEl.innerHTML = 'Scanning...';
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -127,59 +164,147 @@ async function preScanRepo() {
     if (repoInfo) {
       try {
         const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
-        const extensions = new Set();
-        files.forEach(file => {
-          if (file.type === 'blob') { // Only consider files, not directories
-            const ext = getFileExtension(file.path);
-            if (ext) extensions.add(ext);
+        // Extract extensions
+        const extensionCounts = {};
+        files.forEach((file) => {
+          if (file.type === 'blob') {
+            const extMatch = file.path.match(/\.([a-zA-Z0-9]+)$/);
+            let ext = '';
+            if (extMatch) {
+              ext = '.' + extMatch[1];
+            } else if (file.path.endsWith('Dockerfile')) {
+              ext = 'Dockerfile';
+            } else {
+              ext = 'No Extension';
+            }
+            extensionCounts[ext] = (extensionCounts[ext] || 0) + 1;
           }
         });
-        const extensionsArray = Array.from(extensions).sort();
-        availableExtensionsEl.innerHTML = '';
-        extensionsArray.forEach(ext => {
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.value = ext;
-          checkbox.className = 'extension-checkbox';
 
-          // Check if the extension is already in the extensions field
-          const currentExtensions = document.getElementById('extensions').value;
-          // To prevent partial matches (e.g., '.js' matching '.jsx'), use a regex
-          const regex = new RegExp(`(^|,\\s*)${escapeRegExp(ext)}(,|$)`);
-          checkbox.checked = regex.test(currentExtensions);
+        // Sort extensions by count
+        const sortedExtensions = Object.keys(extensionCounts).sort((a, b) => extensionCounts[b] - extensionCounts[a]);
 
-          checkbox.addEventListener('change', updateExtensionsField);
-
+        // Display extension checkboxes
+        availableExtensionsEl.innerHTML = ''; // Clear existing checkboxes
+        sortedExtensions.forEach((ext, index) => {
           const label = document.createElement('label');
-          label.style.display = 'block';
+          label.style.display = 'flex';
+          label.style.alignItems = 'center';
           label.style.fontSize = '14px';
+          label.style.marginBottom = '5px';
           label.style.cursor = 'pointer';
 
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'extension-checkbox';
+          checkbox.value = ext;
+          checkbox.style.marginRight = '10px';
+          checkbox.style.width = '16px';
+          checkbox.style.height = '16px';
+
+          // Pre-select all extensions by default
+          checkbox.checked = true;
+
+          const textNode = document.createTextNode(`${ext} (${extensionCounts[ext]})`);
+
           label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(' ' + ext));
+          label.appendChild(textNode);
           availableExtensionsEl.appendChild(label);
         });
+
+        // Extract directories
+        const directories = extractDirectories(files);
+
+        // Display directory checkboxes
+        directoriesContainerEl.innerHTML = ''; // Clear existing checkboxes
+        directories.forEach((dir) => {
+          const label = document.createElement('label');
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'directory-checkbox';
+          checkbox.value = dir;
+          checkbox.checked = true; // All directories checked by default
+
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(' ' + dir));
+
+          directoriesContainerEl.appendChild(label);
+        });
+
+        // Load saved directory selections if any
+        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+          const tab = tabs[0];
+          const repoInfo = getRepoInfoFromURL(tab.url);
+          if (repoInfo) {
+            const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
+            chrome.storage.local.get(repoKey, (data) => {
+              if (data[repoKey] && data[repoKey].selectedDirectories) {
+                const savedDirs = data[repoKey].selectedDirectories;
+                document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
+                  if (savedDirs.includes(checkbox.value)) {
+                    checkbox.checked = true;
+                  } else {
+                    checkbox.checked = false;
+                  }
+                });
+              }
+            });
+          }
+        });
+
       } catch (error) {
         console.error('Error during pre-scan:', error);
         availableExtensionsEl.innerHTML = 'Error fetching extensions.';
+        directoriesContainerEl.innerHTML = 'Error fetching directories.';
         displayError(error.message);
       }
     } else {
       availableExtensionsEl.innerHTML = '';
+      directoriesContainerEl.innerHTML = '';
       displayError('Not on a valid GitHub repository page.');
     }
   });
 }
 
 /**
- * Update the extensions text field based on selected checkboxes.
+ * Extract unique directories from the repository tree.
+ * @param {Array} files - The repository tree files.
+ * @returns {Array} - List of unique directories.
  */
-function updateExtensionsField() {
-  const checkboxes = document.querySelectorAll('#availableExtensions .extension-checkbox');
-  const selectedExtensions = Array.from(checkboxes)
+function extractDirectories(files) {
+  const directories = new Set();
+  files.forEach(file => {
+    if (file.type === 'tree') { // 'tree' indicates a directory
+      directories.add(file.path);
+    } else {
+      // Extract directory from file path
+      const dir = file.path.split('/').slice(0, -1).join('/');
+      if (dir) directories.add(dir);
+    }
+  });
+  return Array.from(directories).sort();
+}
+
+/**
+ * Load selected directories into the UI.
+ * @param {Array} selectedDirectories - List of directories to select.
+ */
+function loadSelectedDirectories(selectedDirectories) {
+  document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
+    checkbox.checked = selectedDirectories.includes(checkbox.value);
+  });
+}
+
+/**
+ * Get list of selected directories from the UI.
+ * @returns {Array} - List of selected directories.
+ */
+function getSelectedDirectories() {
+  const checkboxes = document.querySelectorAll('.directory-checkbox');
+  return Array.from(checkboxes)
     .filter(checkbox => checkbox.checked)
     .map(checkbox => checkbox.value);
-  document.getElementById('extensions').value = selectedExtensions.join(', ');
 }
 
 /**
@@ -234,6 +359,14 @@ function processRepo() {
       const includeContent = document.getElementById('includeContent').checked;
       const includeTree = document.getElementById('includeTree').checked;
 
+      // Get selected directories
+      const selectedDirectories = getSelectedDirectories();
+      if (selectedDirectories.length === 0) {
+        loadingEl.style.display = 'none';
+        displayError('Please select at least one directory to include in the summary.');
+        return;
+      }
+
       // Save settings if checked
       saveSettings();
 
@@ -243,7 +376,7 @@ function processRepo() {
         const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
         repoFiles = files; // Store files for later use
 
-        let codeFiles = filterCodeFiles(files, extensions);
+        let codeFiles = filterCodeFiles(files, extensions, selectedDirectories);
         const largeFiles = identifyLargeFiles(codeFiles);
 
         if (largeFiles.length > 0) {
@@ -333,7 +466,8 @@ function processRepo() {
  * @returns {Object|null} - An object with owner and repo or null if not a valid repo URL.
  */
 function getRepoInfoFromURL(url) {
-  const regex = /^https:\/\/github\.com\/([^\/]+)\/([^\/]+)(\/|$)/;
+  // Improved regex to handle URLs with additional paths or parameters
+  const regex = /^https:\/\/github\.com\/([^\/]+)\/([^\/?#]+)(?:[\/?#].*)?$/;
   const match = url.match(regex);
   if (match) {
     return { owner: match[1], repo: match[2] };
@@ -403,21 +537,36 @@ function fetchRepoTree(owner, repo) {
 }
 
 /**
- * Filter files based on selected extensions.
- * @param {Array} files - The repository files.
+ * Filter files based on selected extensions and directories.
+ * @param {Array} files - The repository tree files.
  * @param {Array} extensions - The selected file extensions.
+ * @param {Array} selectedDirectories - The selected directories to include.
  * @returns {Array} - Filtered files.
  */
-function filterCodeFiles(files, extensions) {
+function filterCodeFiles(files, extensions, selectedDirectories) {
   if (!files || !Array.isArray(files)) {
     throw new Error('No files found in the repository.');
   }
   return files.filter(item => {
-    return item.type === 'blob' && extensions.some(ext => {
+    // Check if the file is a blob (file)
+    if (item.type !== 'blob') return false;
+
+    // Check file extension
+    const hasValidExtension = extensions.some(ext => {
       if (ext === 'Dockerfile') {
         return item.path.endsWith('Dockerfile');
       }
       return item.path.endsWith(ext);
+    });
+
+    if (!hasValidExtension) return false;
+
+    // Check if the file is within a selected directory
+    if (selectedDirectories.length === 0) return false; // No directories selected
+
+    return selectedDirectories.some(dir => {
+      // Ensure that dir is a prefix of the file path
+      return item.path === dir || item.path.startsWith(dir + '/');
     });
   });
 }
@@ -546,32 +695,6 @@ function estimateTokenCount(text) {
   // Assuming average of 4 characters per token
   const tokens = Math.ceil(text.length / 4);
   return tokens;
-}
-
-/**
- * Extract file extension from a filename.
- * @param {string} filename - The filename to extract extension from.
- * @returns {string} - The file extension, including the dot, or special name like 'Dockerfile'.
- */
-function getFileExtension(filename) {
-  const basename = filename.split(/[\\/]/).pop(); // Extract the file name from the path
-  const dotIndex = basename.lastIndexOf('.');
-  if (dotIndex === -1) {
-    // No dot found, check for special files like 'Dockerfile'
-    if (basename === 'Dockerfile') {
-      return 'Dockerfile';
-    }
-    return ''; // No extension
-  }
-  return basename.slice(dotIndex); // Return the extension including the dot
-}
-
-/**
- * Save GitHub token to Chrome storage.
- * @param {string} token - The GitHub Personal Access Token.
- */
-function saveToken(token) {
-  chrome.storage.local.set({ 'githubToken': token });
 }
 
 /**
