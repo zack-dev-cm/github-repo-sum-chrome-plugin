@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
-  document.getElementById('saveSettingsBtn')?.addEventListener('click', saveSettings); // Optional: If there's a save button
 });
 
 /**
@@ -69,6 +68,8 @@ function loadSettings() {
           document.getElementById('includeTree').checked = settings.includeTree !== false;
           document.getElementById('saveSettings').checked = settings.saveSettings !== false; // Load saveSettings state
           loadSelectedDirectories(settings.selectedDirectories || []);
+          // After loading settings, update the main extensions field based on checked extensions
+          updateMainExtensionsField();
         } else {
           // If no settings saved for this repo, ensure saveSettings is checked by default
           document.getElementById('saveSettings').checked = true;
@@ -164,7 +165,7 @@ async function preScanRepo() {
     if (repoInfo) {
       try {
         const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
-        // Extract extensions
+        // Extract extensions and counts
         const extensionCounts = {};
         files.forEach((file) => {
           if (file.type === 'blob') {
@@ -210,6 +211,9 @@ async function preScanRepo() {
           label.appendChild(checkbox);
           label.appendChild(textNode);
           availableExtensionsEl.appendChild(label);
+
+          // Add event listener to update main extensions field when checkbox state changes
+          checkbox.addEventListener('change', updateMainExtensionsField);
         });
 
         // Extract directories
@@ -217,20 +221,30 @@ async function preScanRepo() {
 
         // Display directory checkboxes
         directoriesContainerEl.innerHTML = ''; // Clear existing checkboxes
-        directories.forEach((dir) => {
-          const label = document.createElement('label');
+        if (directories.length > 0) {
+          directories.forEach((dir) => {
+            const label = document.createElement('label');
 
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.className = 'directory-checkbox';
-          checkbox.value = dir;
-          checkbox.checked = true; // All directories checked by default
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'directory-checkbox';
+            checkbox.value = dir;
+            checkbox.checked = true; // All directories checked by default
 
-          label.appendChild(checkbox);
-          label.appendChild(document.createTextNode(' ' + dir));
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(' ' + dir));
 
-          directoriesContainerEl.appendChild(label);
-        });
+            directoriesContainerEl.appendChild(label);
+          });
+
+          // Add event listeners to directory checkboxes if needed in future
+        } else {
+          // If no directories, inform the user and hide the directories selection
+          directoriesContainerEl.innerHTML = '<em>No directories found. All files with specified extensions will be included.</em>';
+        }
+
+        // After populating extensions and directories, update the main extensions field
+        updateMainExtensionsField();
 
         // Load saved directory selections if any
         chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
@@ -302,15 +316,27 @@ function loadSelectedDirectories(selectedDirectories) {
  */
 function getSelectedDirectories() {
   const checkboxes = document.querySelectorAll('.directory-checkbox');
-  return Array.from(checkboxes)
+  const selected = Array.from(checkboxes)
     .filter(checkbox => checkbox.checked)
     .map(checkbox => checkbox.value);
+  return selected;
+}
+
+/**
+ * Update the main extensions input field based on the checked extension checkboxes.
+ */
+function updateMainExtensionsField() {
+  const extensionCheckboxes = document.querySelectorAll('.extension-checkbox');
+  const selectedExtensions = Array.from(extensionCheckboxes)
+    .filter(checkbox => checkbox.checked)
+    .map(checkbox => checkbox.value);
+  document.getElementById('extensions').value = selectedExtensions.join(', ');
 }
 
 /**
  * Process the repository: fetch files, summarize, and prepare the download.
  */
-function processRepo() {
+async function processRepo() {
   const statusEl = document.getElementById('status');
   const errorEl = document.getElementById('error');
   const loadingEl = document.getElementById('loading');
@@ -334,47 +360,45 @@ function processRepo() {
     const tab = tabs[0];
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
-      // Get extensions from the text field
-      let extensionsInput = document.getElementById('extensions').value;
-      let extensions = extensionsInput
-        .split(',')
-        .map(ext => ext.trim())
-        .filter(ext => ext);
-      
-      if (extensions.length === 0) {
-        loadingEl.style.display = 'none';
-        displayError('Please specify at least one file extension.');
-        return;
-      }
-
-      // Get max characters per file
-      const maxChars = parseInt(document.getElementById('maxChars').value) || 0;
-
-      const tokenInput = document.getElementById('token').value.trim();
-      if (tokenInput) {
-        saveToken(tokenInput);
-      }
-
-      // Get user selections
-      const includeContent = document.getElementById('includeContent').checked;
-      const includeTree = document.getElementById('includeTree').checked;
-
-      // Get selected directories
-      const selectedDirectories = getSelectedDirectories();
-      if (selectedDirectories.length === 0) {
-        loadingEl.style.display = 'none';
-        displayError('Please select at least one directory to include in the summary.');
-        return;
-      }
-
-      // Save settings if checked
-      saveSettings();
-
-      let repoFiles = []; // Declare repoFiles variable in outer scope
-
       try {
         const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
-        repoFiles = files; // Store files for later use
+
+        // Extract directories
+        const directories = extractDirectories(files);
+
+        let selectedDirectories = [];
+        if (directories.length > 0) {
+          selectedDirectories = getSelectedDirectories();
+          if (selectedDirectories.length === 0) {
+            throw new Error('Please select at least one directory to include in the summary.');
+          }
+        } else {
+          // No directories found; include all files with specified extensions
+          selectedDirectories = []; // Empty array signifies all directories are included
+        }
+
+        // Get extensions from the main input field
+        let extensionsInput = document.getElementById('extensions').value;
+        let extensions = extensionsInput
+          .split(',')
+          .map(ext => ext.trim())
+          .filter(ext => ext);
+
+        if (extensions.length === 0) {
+          throw new Error('Please specify at least one file extension.');
+        }
+
+        // Get max characters per file
+        const maxChars = parseInt(document.getElementById('maxChars').value) || 0;
+
+        const tokenInput = document.getElementById('token').value.trim();
+        if (tokenInput) {
+          saveToken(tokenInput);
+        }
+
+        // Get user selections
+        const includeContent = document.getElementById('includeContent').checked;
+        const includeTree = document.getElementById('includeTree').checked;
 
         let codeFiles = filterCodeFiles(files, extensions, selectedDirectories);
         const largeFiles = identifyLargeFiles(codeFiles);
@@ -402,7 +426,7 @@ function processRepo() {
         }
 
         if (includeTree) {
-          treeStructure = buildTreeStructure(repoFiles); // Use repoFiles instead of files
+          treeStructure = buildTreeStructure(files); // Use all files for the tree
           finalContent += '\n\n===== File Tree =====\n' + treeStructure;
         }
 
@@ -448,6 +472,7 @@ function processRepo() {
 
         // Autoscroll to the bottom of the popup to show the summary
         window.scrollTo(0, document.body.scrollHeight);
+
       } catch (error) {
         console.error('Error:', error);
         loadingEl.style.display = 'none';
@@ -561,13 +586,16 @@ function filterCodeFiles(files, extensions, selectedDirectories) {
 
     if (!hasValidExtension) return false;
 
-    // Check if the file is within a selected directory
-    if (selectedDirectories.length === 0) return false; // No directories selected
-
-    return selectedDirectories.some(dir => {
-      // Ensure that dir is a prefix of the file path
-      return item.path === dir || item.path.startsWith(dir + '/');
-    });
+    // If there are selected directories, check if the file is within them
+    if (selectedDirectories.length > 0) {
+      return selectedDirectories.some(dir => {
+        // Ensure that dir is a prefix of the file path
+        return item.path === dir || item.path.startsWith(dir + '/');
+      });
+    } else {
+      // No directories selected, include all files with valid extensions
+      return true;
+    }
   });
 }
 
