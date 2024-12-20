@@ -15,13 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
+  displayAppVersion(); // Display app version on load
+
+  // Add event listeners to settings inputs to save settings when changed
+  addSettingsEventListeners();
 });
 
 /**
- * Initialize the extension by loading token and settings.
+ * Initialize the extension by loading token and settings, and automatically pre-scan the repository.
  */
 async function initializeExtension() {
   await loadToken();
+  await preScanRepo(); // Call preScanRepo before loadSettings to prevent overriding
   loadSettings();
 }
 
@@ -60,7 +65,7 @@ function loadSettings() {
         if (data.githubToken) {
           document.getElementById('token').value = data.githubToken;
         }
-        if (data[repoKey]) {
+        if (data[repoKey] && data.saveSettings) { // Check if saveSettings is true
           const settings = data[repoKey];
           document.getElementById('extensions').value = settings.extensions || '.js, .py, .java, .cpp, .md';
           document.getElementById('maxChars').value = settings.maxChars || '0';
@@ -104,7 +109,8 @@ function saveSettings() {
       };
       chrome.storage.local.set({ [repoKey]: settings }, () => {
         console.log('Settings saved for', repoKey);
-        alert('Settings saved successfully.');
+        // Optionally, provide visual feedback instead of alert
+        // alert('Settings saved successfully.');
       });
     }
   });
@@ -167,16 +173,33 @@ async function preScanRepo() {
         const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
         // Extract extensions and counts
         const extensionCounts = {};
+        const excludedExtensions = [
+          // Archives
+          '.zip', '.rar', '.tar', '.gz', '.7z', '.exe', '.dll',
+          // Images
+          '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.svg', '.webp', '.tiff', '.ico', '.psd',
+          // Media
+          '.mp4', '.mp3', '.avi', '.mkv', '.flac', '.mov', '.wmv',
+          // Documents
+          '.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.csv',
+          // Others
+          '.iso', '.dmg'
+        ];
+
         files.forEach((file) => {
           if (file.type === 'blob') {
             const extMatch = file.path.match(/\.([a-zA-Z0-9]+)$/);
             let ext = '';
             if (extMatch) {
-              ext = '.' + extMatch[1];
+              ext = '.' + extMatch[1].toLowerCase();
             } else if (file.path.endsWith('Dockerfile')) {
               ext = 'Dockerfile';
             } else {
               ext = 'No Extension';
+            }
+            // Exclude unwanted extensions
+            if (excludedExtensions.includes(ext)) {
+              return;
             }
             extensionCounts[ext] = (extensionCounts[ext] || 0) + 1;
           }
@@ -184,6 +207,9 @@ async function preScanRepo() {
 
         // Sort extensions by count
         const sortedExtensions = Object.keys(extensionCounts).sort((a, b) => extensionCounts[b] - extensionCounts[a]);
+
+        // Identify top 5 most common extensions for pre-selection or highlighting
+        const topExtensions = sortedExtensions.slice(0, 5);
 
         // Display extension checkboxes
         availableExtensionsEl.innerHTML = ''; // Clear existing checkboxes
@@ -203,10 +229,14 @@ async function preScanRepo() {
           checkbox.style.width = '16px';
           checkbox.style.height = '16px';
 
-          // Pre-select all extensions by default
-          checkbox.checked = true;
+          // Pre-select top extensions by default
+          checkbox.checked = topExtensions.includes(ext);
 
           const textNode = document.createTextNode(`${ext} (${extensionCounts[ext]})`);
+          if (topExtensions.includes(ext)) {
+            // Highlight top extensions
+            textNode.textContent = `⭐ ${ext} (${extensionCounts[ext]})`;
+          }
 
           label.appendChild(checkbox);
           label.appendChild(textNode);
@@ -219,10 +249,18 @@ async function preScanRepo() {
         // Extract directories
         const directories = extractDirectories(files);
 
+        // Always include root directory '/'
+        if (files.some(file => !file.path.includes('/'))) {
+          directories.push('/'); // Add root if there are files in the root
+        }
+
+        // Remove duplicates and sort
+        const uniqueDirectories = Array.from(new Set(directories)).sort();
+
         // Display directory checkboxes
         directoriesContainerEl.innerHTML = ''; // Clear existing checkboxes
-        if (directories.length > 0) {
-          directories.forEach((dir) => {
+        if (uniqueDirectories.length > 0) {
+          uniqueDirectories.forEach((dir) => {
             const label = document.createElement('label');
 
             const checkbox = document.createElement('input');
@@ -232,7 +270,7 @@ async function preScanRepo() {
             checkbox.checked = true; // All directories checked by default
 
             label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(' ' + dir));
+            label.appendChild(document.createTextNode(' ' + (dir === '/' ? 'Root Directory (/)': dir)));
 
             directoriesContainerEl.appendChild(label);
           });
@@ -246,26 +284,8 @@ async function preScanRepo() {
         // After populating extensions and directories, update the main extensions field
         updateMainExtensionsField();
 
-        // Load saved directory selections if any
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-          const tab = tabs[0];
-          const repoInfo = getRepoInfoFromURL(tab.url);
-          if (repoInfo) {
-            const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
-            chrome.storage.local.get(repoKey, (data) => {
-              if (data[repoKey] && data[repoKey].selectedDirectories) {
-                const savedDirs = data[repoKey].selectedDirectories;
-                document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
-                  if (savedDirs.includes(checkbox.value)) {
-                    checkbox.checked = true;
-                  } else {
-                    checkbox.checked = false;
-                  }
-                });
-              }
-            });
-          }
-        });
+        // Apply saved settings after pre-scan
+        loadSettings();
 
       } catch (error) {
         console.error('Error during pre-scan:', error);
@@ -273,13 +293,9 @@ async function preScanRepo() {
         directoriesContainerEl.innerHTML = 'Error fetching directories.';
         displayError(error.message);
       }
-    } else {
-      availableExtensionsEl.innerHTML = '';
-      directoriesContainerEl.innerHTML = '';
-      displayError('Not on a valid GitHub repository page.');
     }
-  });
-}
+  }); // <-- Added closing parenthesis here
+} // <-- Added closing brace here
 
 /**
  * Extract unique directories from the repository tree.
@@ -334,6 +350,49 @@ function updateMainExtensionsField() {
 }
 
 /**
+ * Add event listeners to settings inputs to save settings when changed.
+ */
+function addSettingsEventListeners() {
+  // Listen to changes on extensions, maxChars, includeContent, includeTree
+  ['input', 'change'].forEach(eventType => {
+    document.getElementById('extensions').addEventListener(eventType, () => {
+      if (document.getElementById('saveSettings').checked) {
+        saveSettings();
+      }
+    });
+
+    document.getElementById('maxChars').addEventListener(eventType, () => {
+      if (document.getElementById('saveSettings').checked) {
+        saveSettings();
+      }
+    });
+
+    document.getElementById('includeContent').addEventListener(eventType, () => {
+      if (document.getElementById('saveSettings').checked) {
+        saveSettings();
+      }
+    });
+
+    document.getElementById('includeTree').addEventListener(eventType, () => {
+      if (document.getElementById('saveSettings').checked) {
+        saveSettings();
+      }
+    });
+  });
+
+  // Listen to changes on directory checkboxes
+  document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
+    ['change'].forEach(eventType => {
+      checkbox.addEventListener(eventType, () => {
+        if (document.getElementById('saveSettings').checked) {
+          saveSettings();
+        }
+      });
+    });
+  });
+}
+
+/**
  * Process the repository: fetch files, summarize, and prepare the download.
  */
 async function processRepo() {
@@ -381,8 +440,11 @@ async function processRepo() {
         let extensionsInput = document.getElementById('extensions').value;
         let extensions = extensionsInput
           .split(',')
-          .map(ext => ext.trim())
+          .map(ext => ext.trim().toLowerCase())
           .filter(ext => ext);
+        
+        // Handle 'No Extension'
+        extensions = extensions.filter(ext => ext !== 'no extension');
 
         if (extensions.length === 0) {
           throw new Error('Please specify at least one file extension.');
@@ -581,7 +643,7 @@ function filterCodeFiles(files, extensions, selectedDirectories) {
       if (ext === 'Dockerfile') {
         return item.path.endsWith('Dockerfile');
       }
-      return item.path.endsWith(ext);
+      return item.path.toLowerCase().endsWith(ext);
     });
 
     if (!hasValidExtension) return false;
@@ -589,6 +651,10 @@ function filterCodeFiles(files, extensions, selectedDirectories) {
     // If there are selected directories, check if the file is within them
     if (selectedDirectories.length > 0) {
       return selectedDirectories.some(dir => {
+        if (dir === '/') {
+          // Root directory: include all files not in any subdirectory
+          return !item.path.includes('/');
+        }
         // Ensure that dir is a prefix of the file path
         return item.path === dir || item.path.startsWith(dir + '/');
       });
@@ -767,4 +833,15 @@ async function submitFeedback() {
 function validateEmail(email) {
   const re = /\S+@\S+\.\S+/;
   return re.test(email);
+}
+
+/**
+ * Display the app version in the popup.
+ */
+function displayAppVersion() {
+  const versionEl = document.getElementById('appVersion');
+  if (versionEl) {
+    const manifestData = chrome.runtime.getManifest();
+    versionEl.textContent = `Version: ${manifestData.version}`;
+  }
 }
