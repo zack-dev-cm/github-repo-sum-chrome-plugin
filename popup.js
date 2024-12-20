@@ -16,9 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
   displayAppVersion(); // Display app version on load
-
-  // Add event listeners to settings inputs to save settings when changed
-  addSettingsEventListeners();
 });
 
 /**
@@ -27,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initializeExtension() {
   await loadToken();
   await preScanRepo(); // Call preScanRepo before loadSettings to prevent overriding
+  // After pre-scan, directories and extensions are loaded, now apply saved settings
   loadSettings();
 }
 
@@ -61,11 +59,11 @@ function loadSettings() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
-      chrome.storage.local.get([repoKey, 'githubToken', 'saveSettings'], (data) => {
+      chrome.storage.local.get([repoKey, 'githubToken'], (data) => {
         if (data.githubToken) {
           document.getElementById('token').value = data.githubToken;
         }
-        if (data[repoKey] && data.saveSettings) { // Check if saveSettings is true
+        if (data[repoKey] && data[repoKey].saveSettings) { // Check if saveSettings is true
           const settings = data[repoKey];
           document.getElementById('extensions').value = settings.extensions || '.js, .py, .java, .cpp, .md';
           document.getElementById('maxChars').value = settings.maxChars || '0';
@@ -88,16 +86,14 @@ function loadSettings() {
  * Save current settings to Chrome storage.
  */
 function saveSettings() {
-  const saveSettingsChecked = document.getElementById('saveSettings').checked;
-  // Save the state of the 'saveSettings' checkbox regardless
-  chrome.storage.local.set({ 'saveSettings': saveSettingsChecked });
-  if (!saveSettingsChecked) return;
-
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
     const tab = tabs[0];
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
+      const saveSettingsChecked = document.getElementById('saveSettings').checked;
+      if (!saveSettingsChecked) return; // Do not save if the checkbox is not checked
+
       const selectedDirectories = getSelectedDirectories();
       const settings = {
         extensions: document.getElementById('extensions').value,
@@ -137,6 +133,8 @@ function toggleAdvancedSettings() {
 function displayError(message) {
   const errorEl = document.getElementById('error');
   const loadingEl = document.getElementById('loading');
+  const statusEl = document.getElementById('status');
+  statusEl.style.display = 'none';
   loadingEl.style.display = 'none';
   errorEl.textContent = message;
   errorEl.style.display = 'block';
@@ -149,7 +147,9 @@ function displayError(message) {
 function displayStatus(message) {
   const statusEl = document.getElementById('status');
   const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
   loadingEl.style.display = 'none';
+  errorEl.style.display = 'none';
   statusEl.textContent = message;
   statusEl.style.display = 'block';
 }
@@ -241,9 +241,6 @@ async function preScanRepo() {
           label.appendChild(checkbox);
           label.appendChild(textNode);
           availableExtensionsEl.appendChild(label);
-
-          // Add event listener to update main extensions field when checkbox state changes
-          checkbox.addEventListener('change', updateMainExtensionsField);
         });
 
         // Extract directories
@@ -274,8 +271,6 @@ async function preScanRepo() {
 
             directoriesContainerEl.appendChild(label);
           });
-
-          // Add event listeners to directory checkboxes if needed in future
         } else {
           // If no directories, inform the user and hide the directories selection
           directoriesContainerEl.innerHTML = '<em>No directories found. All files with specified extensions will be included.</em>';
@@ -284,8 +279,8 @@ async function preScanRepo() {
         // After populating extensions and directories, update the main extensions field
         updateMainExtensionsField();
 
-        // Apply saved settings after pre-scan
-        loadSettings();
+        // Attach event listeners to dynamic checkboxes
+        attachCheckboxEventListeners();
 
       } catch (error) {
         console.error('Error during pre-scan:', error);
@@ -293,9 +288,9 @@ async function preScanRepo() {
         directoriesContainerEl.innerHTML = 'Error fetching directories.';
         displayError(error.message);
       }
-    }
-  }); // <-- Added closing parenthesis here
-} // <-- Added closing brace here
+    } // End of if (repoInfo)
+  }); // End of chrome.tabs.query
+}
 
 /**
  * Extract unique directories from the repository tree.
@@ -350,46 +345,36 @@ function updateMainExtensionsField() {
 }
 
 /**
- * Add event listeners to settings inputs to save settings when changed.
+ * Attach event listeners to dynamically created checkboxes and other settings inputs.
  */
-function addSettingsEventListeners() {
-  // Listen to changes on extensions, maxChars, includeContent, includeTree
-  ['input', 'change'].forEach(eventType => {
-    document.getElementById('extensions').addEventListener(eventType, () => {
-      if (document.getElementById('saveSettings').checked) {
-        saveSettings();
-      }
-    });
+function attachCheckboxEventListeners() {
+  const saveIfNeeded = () => {
+    if (document.getElementById('saveSettings').checked) {
+      saveSettings();
+    }
+  };
 
-    document.getElementById('maxChars').addEventListener(eventType, () => {
-      if (document.getElementById('saveSettings').checked) {
-        saveSettings();
-      }
-    });
-
-    document.getElementById('includeContent').addEventListener(eventType, () => {
-      if (document.getElementById('saveSettings').checked) {
-        saveSettings();
-      }
-    });
-
-    document.getElementById('includeTree').addEventListener(eventType, () => {
-      if (document.getElementById('saveSettings').checked) {
-        saveSettings();
-      }
-    });
-  });
-
-  // Listen to changes on directory checkboxes
+  // Attach listeners to directory checkboxes
   document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
-    ['change'].forEach(eventType => {
-      checkbox.addEventListener(eventType, () => {
-        if (document.getElementById('saveSettings').checked) {
-          saveSettings();
-        }
-      });
+    checkbox.addEventListener('change', saveIfNeeded);
+  });
+
+  // Attach listeners to extension checkboxes
+  document.querySelectorAll('.extension-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      updateMainExtensionsField();
+      saveIfNeeded();
     });
   });
+
+  // Attach listeners to other settings inputs
+  document.getElementById('extensions').addEventListener('input', saveIfNeeded);
+  document.getElementById('maxChars').addEventListener('input', saveIfNeeded);
+  document.getElementById('includeContent').addEventListener('change', saveIfNeeded);
+  document.getElementById('includeTree').addEventListener('change', saveIfNeeded);
+
+  // Attach listener to 'saveSettings' checkbox
+  document.getElementById('saveSettings').addEventListener('change', saveSettings);
 }
 
 /**
