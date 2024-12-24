@@ -16,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
   displayAppVersion(); // Display app version on load
+
+  // Attach listener to token input to save token on change
+  document.getElementById('token').addEventListener('input', (e) => {
+    saveToken(e.target.value.trim());
+  });
 });
 
 /**
@@ -23,9 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function initializeExtension() {
   await loadToken();
-  await preScanRepo(); // Call preScanRepo before loadSettings to prevent overriding
-  // After pre-scan, directories and extensions are loaded, now apply saved settings
-  loadSettings();
+  await preScanRepo(); // Pre-scan populates checkboxes
+  await loadSettings(); // Then load previously saved settings
 }
 
 /**
@@ -47,39 +51,71 @@ function loadToken() {
  * @param {string} token - The GitHub Personal Access Token.
  */
 function saveToken(token) {
-  chrome.storage.local.set({ 'githubToken': token });
+  chrome.storage.local.set({ 'githubToken': token }, () => {
+    console.log('GitHub token saved.');
+  });
 }
 
 /**
  * Load user settings from Chrome storage and apply to the UI.
  */
 function loadSettings() {
-  chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-    const tab = tabs[0];
-    const repoInfo = getRepoInfoFromURL(tab.url);
-    if (repoInfo) {
-      const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
-      chrome.storage.local.get([repoKey, 'githubToken'], (data) => {
-        if (data.githubToken) {
-          document.getElementById('token').value = data.githubToken;
-        }
-        if (data[repoKey] && data[repoKey].saveSettings) { // Check if saveSettings is true
-          const settings = data[repoKey];
-          document.getElementById('extensions').value = settings.extensions || '.js, .py, .java, .cpp, .md';
-          document.getElementById('maxChars').value = settings.maxChars || '0';
-          document.getElementById('includeContent').checked = settings.includeContent !== false;
-          document.getElementById('includeTree').checked = settings.includeTree !== false;
-          document.getElementById('saveSettings').checked = settings.saveSettings !== false; // Load saveSettings state
-          loadSelectedDirectories(settings.selectedDirectories || []);
-          // After loading settings, update the main extensions field based on checked extensions
-          updateMainExtensionsField();
-        } else {
-          // If no settings saved for this repo, ensure saveSettings is checked by default
-          document.getElementById('saveSettings').checked = true;
-        }
-      });
+  return new Promise((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      const tab = tabs[0];
+      const repoInfo = getRepoInfoFromURL(tab.url);
+      if (repoInfo) {
+        const repoKey = `${repoInfo.owner}/${repoInfo.repo}`;
+        chrome.storage.local.get([repoKey, 'githubToken'], (data) => {
+          if (data.githubToken) {
+            document.getElementById('token').value = data.githubToken;
+          }
+          if (data[repoKey] && data[repoKey].saveSettings) { // Check if saveSettings is true
+            const settings = data[repoKey];
+            document.getElementById('extensions').value = settings.extensions || '.js, .py, .java, .cpp, .md';
+            document.getElementById('maxChars').value = settings.maxChars || '0';
+            document.getElementById('includeContent').checked = settings.includeContent !== false;
+            document.getElementById('includeTree').checked = settings.includeTree !== false;
+            document.getElementById('saveSettings').checked = settings.saveSettings !== false; // Load saveSettings state
+            loadSelectedDirectories(settings.selectedDirectories || []);
+            
+            // After loading settings, update the main extensions field based on saved extensions
+            const savedExtensionsArray = settings.extensions
+              .split(',')
+              .map(ext => ext.trim().toLowerCase())
+              .filter(ext => ext);
+            
+            loadSavedExtensionCheckboxes(savedExtensionsArray);
+          } else {
+            // If no settings saved for this repo, ensure saveSettings is checked by default
+            document.getElementById('saveSettings').checked = true;
+          }
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+/**
+ * Load saved extension checkboxes based on saved extensions array.
+ * @param {Array} savedExtensionsArray - Array of saved extensions.
+ */
+function loadSavedExtensionCheckboxes(savedExtensionsArray) {
+  const extensionCheckboxes = document.querySelectorAll('.extension-checkbox');
+  extensionCheckboxes.forEach(checkbox => {
+    // Check if the extension is in saved list
+    if (savedExtensionsArray.includes(checkbox.value)) {
+      checkbox.checked = true;
+    } else {
+      checkbox.checked = false;
     }
   });
+
+  // Update the main extensions input field to reflect the saved checkboxes
+  updateMainExtensionsField();
 }
 
 /**
@@ -235,7 +271,8 @@ async function preScanRepo() {
           const textNode = document.createTextNode(`${ext} (${extensionCounts[ext]})`);
           if (topExtensions.includes(ext)) {
             // Highlight top extensions
-            textNode.textContent = `⭐ ${ext} (${extensionCounts[ext]})`;
+            // Using a bullet or similar marker for highlighting
+            textNode.textContent = `• ${ext} (${extensionCounts[ext]})`;
           }
 
           label.appendChild(checkbox);
