@@ -267,6 +267,51 @@
       border-top: 1px solid #d1d5da;
       padding-top: 10px;
     }
+
+    /* New Styles for Directory Search and Select All */
+    #directoryControls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    #directorySearch {
+      flex: 1;
+      margin-right: 10px;
+      padding: 6px;
+      font-size: 14px;
+      border: 1px solid #d1d5da;
+      border-radius: 4px;
+    }
+    #selectAllContainer {
+      display: flex;
+      align-items: center;
+    }
+    #selectAllContainer input[type="checkbox"] {
+      margin-right: 5px;
+      width: 16px;
+      height: 16px;
+    }
+    #clearSelectionBtn {
+      background-color: #d73a49;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: background-color 0.2s;
+    }
+    #clearSelectionBtn:hover {
+      background-color: #b52a3c;
+    }
+    #selectedCount {
+      font-size: 12px;
+      color: #555;
+      margin-top: 5px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
@@ -298,7 +343,16 @@
     <!-- Directory Selection Section -->
     <div class="form-group">
       <label for="directories">Select Directories to Include:</label>
+      <div id="directoryControls">
+        <input type="text" id="directorySearch" placeholder="Search directories...">
+        <div id="selectAllContainer">
+          <input type="checkbox" id="selectAllDirectories" checked>
+          <label for="selectAllDirectories" style="margin:0;">Select All</label>
+          <button id="clearSelectionBtn" title="Clear All Selections">Clear</button>
+        </div>
+      </div>
       <div id="directoriesContainer">Scanning...</div>
+      <div id="selectedCount">Selected: 0</div>
     </div>
   </div>
 

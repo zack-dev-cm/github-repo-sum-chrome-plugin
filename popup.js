@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
   displayAppVersion(); // Display app version on load
 
+  // Directory Controls
+  document.getElementById('directorySearch').addEventListener('input', filterDirectories);
+  document.getElementById('selectAllDirectories').addEventListener('change', toggleSelectAllDirectories);
+  document.getElementById('clearSelectionBtn').addEventListener('click', clearAllDirectories);
+
   // Attach listener to token input to save token on change
   document.getElementById('token').addEventListener('input', (e) => {
     saveToken(e.target.value.trim());
@@ -197,9 +202,11 @@ async function preScanRepo() {
   const errorEl = document.getElementById('error');
   const availableExtensionsEl = document.getElementById('availableExtensions');
   const directoriesContainerEl = document.getElementById('directoriesContainer');
+  const selectedCountEl = document.getElementById('selectedCount');
   errorEl.style.display = 'none';
   availableExtensionsEl.innerHTML = 'Scanning...';
   directoriesContainerEl.innerHTML = 'Scanning...';
+  selectedCountEl.textContent = 'Selected: 0';
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -308,9 +315,16 @@ async function preScanRepo() {
 
             directoriesContainerEl.appendChild(label);
           });
+
+          // Update selected count
+          updateSelectedCount();
         } else {
           // If no directories, inform the user and hide the directories selection
           directoriesContainerEl.innerHTML = '<em>No directories found. All files with specified extensions will be included.</em>';
+          document.getElementById('selectAllContainer').style.display = 'none';
+          document.getElementById('directorySearch').style.display = 'none';
+          document.getElementById('clearSelectionBtn').style.display = 'none';
+          selectedCountEl.textContent = 'Selected: 0';
         }
 
         // After populating extensions and directories, update the main extensions field
@@ -356,6 +370,12 @@ function loadSelectedDirectories(selectedDirectories) {
   document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
     checkbox.checked = selectedDirectories.includes(checkbox.value);
   });
+
+  // Update Select All checkbox based on individual selections
+  updateSelectAllCheckbox();
+
+  // Update selected count
+  updateSelectedCount();
 }
 
 /**
@@ -393,7 +413,11 @@ function attachCheckboxEventListeners() {
 
   // Attach listeners to directory checkboxes
   document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
-    checkbox.addEventListener('change', saveIfNeeded);
+    checkbox.addEventListener('change', () => {
+      saveIfNeeded();
+      updateSelectAllCheckbox();
+      updateSelectedCount();
+    });
   });
 
   // Attach listeners to extension checkboxes
@@ -866,4 +890,134 @@ function displayAppVersion() {
     const manifestData = chrome.runtime.getManifest();
     versionEl.textContent = `Version: ${manifestData.version}`;
   }
+}
+
+/**
+ * Display the number of selected directories.
+ */
+function updateSelectedCount() {
+  const selectedCountEl = document.getElementById('selectedCount');
+  const selected = getSelectedDirectories().length;
+  selectedCountEl.textContent = `Selected: ${selected}`;
+}
+
+/**
+ * Toggle select all directories based on the "Select All" checkbox.
+ */
+function toggleSelectAllDirectories() {
+  const selectAllCheckbox = document.getElementById('selectAllDirectories');
+  const isChecked = selectAllCheckbox.checked;
+  document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
+    checkbox.checked = isChecked;
+  });
+  saveSettings();
+  updateSelectedCount();
+}
+
+/**
+ * Clear all directory selections.
+ */
+function clearAllDirectories() {
+  document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
+    checkbox.checked = false;
+  });
+  document.getElementById('selectAllDirectories').checked = false;
+  saveSettings();
+  updateSelectedCount();
+}
+
+/**
+ * Update the state of the "Select All" checkbox based on individual selections.
+ */
+function updateSelectAllCheckbox() {
+  const selectAllCheckbox = document.getElementById('selectAllDirectories');
+  const total = document.querySelectorAll('.directory-checkbox').length;
+  const checked = document.querySelectorAll('.directory-checkbox:checked').length;
+  if (checked === total) {
+    selectAllCheckbox.checked = true;
+    selectAllCheckbox.indeterminate = false;
+  } else if (checked > 0) {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = true;
+  } else {
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+  }
+}
+
+/**
+ * Filter directories based on search input.
+ */
+function filterDirectories() {
+  const searchTerm = document.getElementById('directorySearch').value.toLowerCase();
+  document.querySelectorAll('.directory-checkbox').forEach(checkbox => {
+    const label = checkbox.parentElement;
+    if (checkbox.value.toLowerCase().includes(searchTerm)) {
+      label.style.display = 'flex';
+    } else {
+      label.style.display = 'none';
+    }
+  });
+}
+
+/**
+ * Display an error message to the user.
+ * @param {string} message - The error message to display.
+ */
+function displayError(message) {
+  const errorEl = document.getElementById('error');
+  const loadingEl = document.getElementById('loading');
+  const statusEl = document.getElementById('status');
+  statusEl.style.display = 'none';
+  loadingEl.style.display = 'none';
+  errorEl.textContent = message;
+  errorEl.style.display = 'block';
+}
+
+/**
+ * Display a status message to the user.
+ * @param {string} message - The status message to display.
+ */
+function displayStatus(message) {
+  const statusEl = document.getElementById('status');
+  const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error');
+  loadingEl.style.display = 'none';
+  errorEl.style.display = 'none';
+  statusEl.textContent = message;
+  statusEl.style.display = 'block';
+}
+
+/**
+ * Submit user feedback via a mailto link.
+ */
+async function submitFeedback() {
+  const feedbackText = document.getElementById('feedback').value.trim();
+  if (!feedbackText) {
+    alert('Please enter your feedback before submitting.');
+    return;
+  }
+
+  // Replace with your actual email address
+  const yourEmail = 'kaisenaiko@gmail.com';
+  
+  // Validate email format (basic validation)
+  if (!validateEmail(yourEmail)) {
+    alert('Feedback submission failed: Invalid email address configured.');
+    return;
+  }
+
+  // Encode feedback for URL
+  const encodedFeedback = encodeURIComponent(feedbackText);
+  
+  // Create mailto link
+  const mailtoLink = `mailto:${yourEmail}?subject=GitHub%20Repo%20Summarizer%20Feedback&body=${encodedFeedback}`;
+  
+  // Open mail client
+  window.location.href = mailtoLink;
+
+  // Clear the feedback field after submission
+  document.getElementById('feedback').value = '';
+
+  alert('Thank you for your feedback!');
 }
