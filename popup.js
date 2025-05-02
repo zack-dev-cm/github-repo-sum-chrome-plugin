@@ -35,6 +35,7 @@ async function initializeExtension() {
   await loadToken();
   await preScanRepo(); // Pre-scan populates checkboxes
   await loadSettings(); // Then load previously saved settings
+  await displayRepoSize(); // Fetch and display the repository size
 }
 
 /**
@@ -195,6 +196,52 @@ function displayStatus(message) {
   statusEl.style.display = 'block';
 }
 
+
+/**
+ * Display the repository size when the extension loads.
+ */
+async function displayRepoSize() {
+  const statusEl = document.getElementById('status');
+  const errorEl = document.getElementById('error');
+  const repoSizeEl = document.getElementById('repoSize');
+  const loadingEl = document.getElementById('loading');
+
+  loadingEl.style.display = 'flex'; // Show loading spinner
+  repoSizeEl.style.display = 'none'; // Hide the size element until it's fetched
+
+  try {
+    const repoInfo = await getRepoInfoFromCurrentTab();
+    if (repoInfo) {
+      const repoSizeMB = await getRepoSize(repoInfo.owner, repoInfo.repo);
+      repoSizeEl.textContent = `Repo Size: ${repoSizeMB.toFixed(2)} MB`;
+      repoSizeEl.style.display = 'block'; // Show the repo size once it's fetched
+      loadingEl.style.display = 'none'; // Hide the loading spinner
+    } else {
+      throw new Error('Unable to retrieve repository information.');
+    }
+  } catch (error) {
+    console.error('Error fetching repository size:', error);
+    loadingEl.style.display = 'none';
+    errorEl.textContent = 'Error fetching repository size.';
+    errorEl.style.display = 'block';
+  }
+}
+
+/**
+ * Extract repository owner and name from the current URL (active tab).
+ * @returns {Object|null} - An object with owner and repo or null if not a valid repo URL.
+ */
+function getRepoInfoFromCurrentTab() {
+  return new Promise((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tab = tabs[0];
+      const repoInfo = getRepoInfoFromURL(tab.url); // Get repo info from the current tab's URL
+      resolve(repoInfo);
+    });
+  });
+}
+
+
 /**
  * Pre-scan the repository to fetch and display available file extensions and directories.
  */
@@ -226,7 +273,7 @@ async function preScanRepo() {
           // Documents
           '.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.csv',
           // Others
-          '.iso', '.dmg'
+          '.iso', '.dmg', 'No Extension'
         ];
 
         files.forEach((file) => {
@@ -251,8 +298,8 @@ async function preScanRepo() {
         // Sort extensions by count
         const sortedExtensions = Object.keys(extensionCounts).sort((a, b) => extensionCounts[b] - extensionCounts[a]);
 
-        // Identify top 5 most common extensions for pre-selection or highlighting
-        const topExtensions = sortedExtensions.slice(0, 5);
+        // Identify top 10 most common extensions for pre-selection or highlighting
+        const topExtensions = sortedExtensions.slice(0, 10);
 
         // Display extension checkboxes
         availableExtensionsEl.innerHTML = ''; // Clear existing checkboxes
@@ -438,6 +485,14 @@ function attachCheckboxEventListeners() {
   document.getElementById('saveSettings').addEventListener('change', saveSettings);
 }
 
+// Fetch repository details to get the size
+async function getRepoSize(owner, repo) {
+  const response = await fetchWithToken(`https://api.github.com/repos/${owner}/${repo}`);
+  const repoData = await response.json();
+  return repoData.size / 1024; // Convert size from KB to MB
+}
+
+
 /**
  * Process the repository: fetch files, summarize, and prepare the download.
  */
@@ -468,6 +523,10 @@ async function processRepo() {
       try {
         const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
 
+        // Fetch repository size and display it
+        const repoSizeMB = await getRepoSize(repoInfo.owner, repoInfo.repo);
+        document.getElementById('repoSize').textContent = `Repository size: ${repoSizeMB.toFixed(2)} MB`;
+
         // Extract directories
         const directories = extractDirectories(files);
 
@@ -490,12 +549,13 @@ async function processRepo() {
           .filter(ext => ext);
         
         // Handle 'No Extension'
-        extensions = extensions.filter(ext => ext !== 'no extension');
+        extensions = extensions.filter(ext => ext.toLowerCase() !== 'no extension');
 
         if (extensions.length === 0) {
           throw new Error('Please specify at least one file extension.');
         }
 
+        
         // Get max characters per file
         const maxChars = parseInt(document.getElementById('maxChars').value) || 0;
 
@@ -986,38 +1046,4 @@ function displayStatus(message) {
   errorEl.style.display = 'none';
   statusEl.textContent = message;
   statusEl.style.display = 'block';
-}
-
-/**
- * Submit user feedback via a mailto link.
- */
-async function submitFeedback() {
-  const feedbackText = document.getElementById('feedback').value.trim();
-  if (!feedbackText) {
-    alert('Please enter your feedback before submitting.');
-    return;
-  }
-
-  // Replace with your actual email address
-  const yourEmail = 'kaisenaiko@gmail.com';
-  
-  // Validate email format (basic validation)
-  if (!validateEmail(yourEmail)) {
-    alert('Feedback submission failed: Invalid email address configured.');
-    return;
-  }
-
-  // Encode feedback for URL
-  const encodedFeedback = encodeURIComponent(feedbackText);
-  
-  // Create mailto link
-  const mailtoLink = `mailto:${yourEmail}?subject=GitHub%20Repo%20Summarizer%20Feedback&body=${encodedFeedback}`;
-  
-  // Open mail client
-  window.location.href = mailtoLink;
-
-  // Clear the feedback field after submission
-  document.getElementById('feedback').value = '';
-
-  alert('Thank you for your feedback!');
 }
