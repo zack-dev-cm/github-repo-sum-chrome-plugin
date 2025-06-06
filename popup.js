@@ -260,7 +260,8 @@ async function preScanRepo() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       try {
-        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
+        const commit = document.getElementById('commit').value.trim();
+        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo, commit);
         // Extract extensions and counts
         const extensionCounts = {};
         const excludedExtensions = [
@@ -521,7 +522,8 @@ async function processRepo() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       try {
-        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo);
+        const commit = document.getElementById('commit').value.trim();
+        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo, commit);
 
         // Fetch repository size and display it
         const repoSizeMB = await getRepoSize(repoInfo.owner, repoInfo.repo);
@@ -702,14 +704,16 @@ function fetchWithToken(url) {
  * @param {string} repo - Repository name.
  * @returns {Promise<Array>} - The repository tree.
  */
-function fetchRepoTree(owner, repo) {
-  // Fetch the default branch
-  return fetchWithToken(`https://api.github.com/repos/${owner}/${repo}`)
-    .then(response => response.json())
-    .then(repoData => {
-      const branch = repoData.default_branch;
-      return fetchWithToken(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`);
-    })
+function fetchRepoTree(owner, repo, ref) {
+  const refPromise = ref
+    ? Promise.resolve(ref)
+    : fetchWithToken(`https://api.github.com/repos/${owner}/${repo}`)
+        .then(response => response.json())
+        .then(repoData => repoData.default_branch);
+  return refPromise
+    .then(resolvedRef =>
+      fetchWithToken(`https://api.github.com/repos/${owner}/${repo}/git/trees/${resolvedRef}?recursive=1`)
+    )
     .then(response => response.json())
     .then(treeData => {
       if (treeData.truncated) {
