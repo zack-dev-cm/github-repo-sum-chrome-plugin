@@ -50,6 +50,7 @@
     input[type="text"],
     input[type="password"],
     input[type="number"],
+    select,
     textarea {
       width: 100%;
       padding: 12px 16px;
@@ -62,6 +63,7 @@
     input[type="text"]:focus,
     input[type="password"]:focus,
     input[type="number"]:focus,
+    select:focus,
     textarea:focus {
       border-color: var(--md-sys-color-primary);
       outline: none;
@@ -83,6 +85,10 @@
       margin-right: 10px;
       width: 16px;
       height: 16px;
+    }
+
+    select {
+      margin-top: 5px;
     }
 
     /* Button Styles */
@@ -377,6 +383,7 @@
   <div class="form-group">
     <label for="commit">Commit SHA or Branch (optional):</label>
     <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
+    <select id="commitDropdown"></select>
   </div>
 
   <div class="checkbox-group">

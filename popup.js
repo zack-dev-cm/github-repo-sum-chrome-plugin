@@ -36,6 +36,7 @@ async function initializeExtension() {
   await preScanRepo(); // Pre-scan populates checkboxes
   await loadSettings(); // Then load previously saved settings
   await displayRepoSize(); // Fetch and display the repository size
+  await populateCommitDropdown(); // Load commits into dropdown
 }
 
 /**
@@ -491,6 +492,50 @@ async function getRepoSize(owner, repo) {
   const response = await fetchWithToken(`https://api.github.com/repos/${owner}/${repo}`);
   const repoData = await response.json();
   return repoData.size / 1024; // Convert size from KB to MB
+}
+
+// Fetch recent commits for a repository
+async function fetchRecentCommits(owner, repo, limit = 10) {
+  const response = await fetchWithToken(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=${limit}`);
+  const data = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error('Unable to fetch commits');
+  }
+  return data;
+}
+
+// Populate commit dropdown with recent commits
+async function populateCommitDropdown() {
+  const dropdown = document.getElementById('commitDropdown');
+  if (!dropdown) return;
+  dropdown.innerHTML = '<option>Loading commits...</option>';
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    const tab = tabs[0];
+    const repoInfo = getRepoInfoFromURL(tab.url);
+    if (!repoInfo) {
+      dropdown.innerHTML = '<option>No repo detected</option>';
+      return;
+    }
+    try {
+      const commits = await fetchRecentCommits(repoInfo.owner, repoInfo.repo);
+      dropdown.innerHTML = '<option value="">Latest</option>';
+      commits.forEach(commit => {
+        const sha = commit.sha;
+        const message = commit.commit && commit.commit.message ? commit.commit.message.split('\n')[0] : sha;
+        const option = document.createElement('option');
+        option.value = sha;
+        option.textContent = `${sha.substring(0,7)} - ${message}`;
+        dropdown.appendChild(option);
+      });
+    } catch (err) {
+      console.error(err);
+      dropdown.innerHTML = '<option>Error loading commits</option>';
+    }
+  });
+
+  dropdown.addEventListener('change', (e) => {
+    document.getElementById('commit').value = e.target.value;
+  });
 }
 
 

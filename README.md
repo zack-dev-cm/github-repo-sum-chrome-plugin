@@ -50,7 +50,7 @@
 
 3. **Summarize the Repository**:
 
-   - In the popup window, you can optionally specify a commit SHA or branch name.
+   - In the popup window, you can pick a commit from the dropdown or specify a branch name.
    - Click the **Summarize Repository** button to generate the summary.
    - Optionally, enter your GitHub Personal Access Token for higher rate limits.
 
