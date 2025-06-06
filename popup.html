@@ -11,20 +11,31 @@
       margin: 0;
       padding: 0;
     }
+
+    :root {
+      --md-sys-color-primary: #6750a4;
+      --md-sys-color-on-primary: #ffffff;
+      --md-sys-color-surface: #ffffff;
+      --md-sys-color-on-surface: #202124;
+      --md-sys-color-surface-container-low: #f5f5f5;
+      --md-sys-color-outline: #c9c8c8;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      color: #333;
+      font-family: 'Roboto', 'Noto', sans-serif;
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
       width: 360px;
-      padding: 20px;
+      padding: 16px;
       overflow-y: auto; /* Enable vertical scrolling */
       max-height: 600px; /* Set a maximum height for the popup */
     }
     h2 {
-      font-size: 22px;
-      color: #0366d6;
+      font-size: 24px;
+      color: var(--md-sys-color-primary);
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      font-weight: 500;
     }
 
     /* Form Styles */
@@ -41,20 +52,20 @@
     input[type="number"],
     textarea {
       width: 100%;
-      padding: 10px;
+      padding: 12px 16px;
       font-size: 14px;
-      border: 1px solid #d1d5da;
+      border: 1px solid var(--md-sys-color-outline);
       border-radius: 4px;
-      background-color: #fafbfc;
+      background-color: var(--md-sys-color-surface-container-low);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     input[type="text"]:focus,
     input[type="password"]:focus,
     input[type="number"]:focus,
     textarea:focus {
-      border-color: #0366d6;
+      border-color: var(--md-sys-color-primary);
       outline: none;
-      box-shadow: 0 0 0 2px rgba(3, 102, 214, 0.3);
+      box-shadow: 0 0 0 2px rgba(103, 80, 164, 0.3);
     }
 
     /* Checkbox Styles */
@@ -79,24 +90,24 @@
       width: 100%;
       padding: 12px;
       margin-top: 20px;
-      background-color: #2ea44f;
-      color: #fff;
+      background-color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-primary);
       border: none;
-      border-radius: 6px;
-      font-size: 16px;
+      border-radius: 20px;
+      font-size: 15px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 500;
       transition: background-color 0.2s;
     }
     button:hover {
-      background-color: #22863a;
+      background-color: #5b4897;
     }
 
     /* Advanced Settings Toggle */
     #advancedSettingsBtn {
       background: none;
       border: none;
-      color: #0366d6;
+      color: var(--md-sys-color-primary);
       cursor: pointer;
       font-size: 14px;
       margin-top: 10px;
@@ -152,14 +163,14 @@
       text-align: center;
     }
     #downloadLink a {
-      color: #0366d6;
+      color: var(--md-sys-color-primary);
       text-decoration: none;
-      font-weight: bold;
+      font-weight: 500;
       font-size: 15px;
       transition: color 0.2s;
     }
     #downloadLink a:hover {
-      color: #024e8a;
+      color: #5b4897;
       text-decoration: underline;
     }
 
@@ -175,9 +186,9 @@
     #summaryPreview {
       margin-top: 20px;
       font-size: 13px;
-      background-color: #fff;
+      background-color: var(--md-sys-color-surface);
       padding: 12px;
-      border: 1px solid #d1d5da;
+      border: 1px solid var(--md-sys-color-outline);
       border-radius: 6px;
       max-height: 200px;
       overflow-y: auto;
@@ -202,32 +213,32 @@
     /* Feedback Section */
     #feedbackSection {
       margin-top: 20px;
-      border-top: 1px solid #d1d5da;
+      border-top: 1px solid var(--md-sys-color-outline);
       padding-top: 20px;
     }
     #feedbackSection h3 {
       font-size: 16px;
       margin-bottom: 10px;
-      color: #0366d6;
+      color: var(--md-sys-color-primary);
     }
     #feedbackSection textarea {
       resize: vertical;
       height: 80px;
     }
     #submitFeedbackBtn {
-      background-color: #0366d6;
+      background-color: var(--md-sys-color-primary);
     }
     #submitFeedbackBtn:hover {
-      background-color: #024e8a;
+      background-color: #5b4897;
     }
 
     /* Directory Selection Styles */
     #directoriesContainer {
       max-height: 150px;
       overflow-y: auto;
-      border: 1px solid #d1d5da;
+      border: 1px solid var(--md-sys-color-outline);
       padding: 10px;
-      background-color: #fff;
+      background-color: var(--md-sys-color-surface);
       border-radius: 4px;
     }
     #directoriesContainer label {
@@ -264,7 +275,7 @@
       font-size: 12px;
       color: #777;
       text-align: center;
-      border-top: 1px solid #d1d5da;
+      border-top: 1px solid var(--md-sys-color-outline);
       padding-top: 10px;
     }
 
@@ -280,7 +291,7 @@
       margin-right: 10px;
       padding: 6px;
       font-size: 14px;
-      border: 1px solid #d1d5da;
+      border: 1px solid var(--md-sys-color-outline);
       border-radius: 4px;
     }
     #selectAllContainer {
