@@ -9,12 +9,15 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+let latestSummary = '';
+
 document.addEventListener('DOMContentLoaded', () => {
   initializeExtension();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
+  document.getElementById('copySummaryBtn').addEventListener('click', copySummaryToClipboard);
   displayAppVersion(); // Display app version on load
 
   // Directory Controls
@@ -549,6 +552,7 @@ async function processRepo() {
   const downloadLinkContainer = document.getElementById('downloadLink');
   const downloadFileLink = document.getElementById('downloadFileLink');
   const summaryPreviewEl = document.getElementById('summaryPreview');
+  const copySummaryBtn = document.getElementById('copySummaryBtn');
   const fileSizeEl = document.getElementById('fileSize');
   const tokenCountEl = document.getElementById('tokenCount');
 
@@ -559,6 +563,7 @@ async function processRepo() {
   downloadLinkContainer.style.display = 'none';
   summaryPreviewEl.style.display = 'none';
   summaryPreviewEl.textContent = '';
+  copySummaryBtn.style.display = 'none';
   fileSizeEl.style.display = 'none';
   tokenCountEl.style.display = 'none';
 
@@ -684,6 +689,8 @@ async function processRepo() {
         }
 
         summaryPreviewEl.style.display = 'block';
+        latestSummary = finalContent;
+        copySummaryBtn.style.display = 'block';
 
         // Autoscroll to the bottom of the popup to show the summary
         window.scrollTo(0, document.body.scrollHeight);
@@ -932,6 +939,19 @@ function createDownloadableFile(content, repoName) {
   downloadFileLink.href = url;
   downloadFileLink.download = `${repoName}-code-summary.txt`;
   downloadFileLink.textContent = `Download ${repoName} Code Summary`;
+}
+
+function copySummaryToClipboard() {
+  if (!latestSummary) {
+    displayError('No summary available to copy.');
+    return;
+  }
+  navigator.clipboard.writeText(latestSummary)
+    .then(() => displayStatus('Summary copied to clipboard.'))
+    .catch(err => {
+      console.error('Clipboard copy failed:', err);
+      displayError('Failed to copy summary to clipboard.');
+    });
 }
 
 /**
