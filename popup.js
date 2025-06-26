@@ -747,8 +747,8 @@ async function processRepo() {
         latestSummary = finalContent;
         copySummaryBtn.style.display = 'block';
 
-        // Autoscroll to the bottom of the popup to show the summary
-        window.scrollTo(0, document.body.scrollHeight);
+        // Scroll to the copy button and center it in the view
+        copySummaryBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
       } catch (error) {
         console.error('Error:', error);
@@ -1004,7 +1004,12 @@ function copySummaryToClipboard() {
   navigator.clipboard.writeText(latestSummary)
     .then(() => {
       displayStatus('Summary copied to clipboard.');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const statusEl = document.getElementById('status');
+      statusEl.classList.add('highlight');
+      statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        statusEl.classList.remove('highlight');
+      }, 2000);
       maybeShowStarPrompt();
     })
     .catch(err => {

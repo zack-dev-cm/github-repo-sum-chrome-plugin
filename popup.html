@@ -341,6 +341,15 @@
     #starPrompt button {
       margin-top: 10px;
     }
+
+    /* Highlight animation for clipboard status */
+    @keyframes highlight-fade {
+      from { background-color: #fff3cd; }
+      to { background-color: transparent; }
+    }
+    .highlight {
+      animation: highlight-fade 2s ease-in-out;
+    }
   </style>
 </head>
 <body>
