@@ -18,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
   document.getElementById('copySummaryBtn').addEventListener('click', copySummaryToClipboard);
+  const starBtn = document.getElementById('starRepoBtn');
+  if (starBtn) starBtn.addEventListener('click', starRepo);
+  const dismissBtn = document.getElementById('dismissStarPromptBtn');
+  if (dismissBtn) dismissBtn.addEventListener('click', dismissStarPrompt);
   displayAppVersion(); // Display app version on load
 
   // Directory Controls
@@ -198,6 +202,57 @@ function displayStatus(message) {
   errorEl.style.display = 'none';
   statusEl.textContent = message;
   statusEl.style.display = 'block';
+}
+
+/**
+ * Randomly show the GitHub star prompt if not previously dismissed.
+ */
+function maybeShowStarPrompt() {
+  const promptEl = document.getElementById('starPrompt');
+  if (!promptEl) return;
+  const dismissed = localStorage.getItem('starPromptDismissed');
+  if (dismissed) return;
+  if (Math.random() < 0.3) {
+    promptEl.style.display = 'block';
+  }
+}
+
+/**
+ * Attempt to star the repository on GitHub or open the repo page.
+ */
+function starRepo() {
+  const repoUrl = 'https://github.com/zack-dev-cm/github-repo-sum-chrome-plugin';
+  const token = document.getElementById('token').value.trim();
+  if (!token) {
+    chrome.tabs.create({ url: repoUrl });
+    return;
+  }
+  fetch('https://api.github.com/user/starred/zack-dev-cm/github-repo-sum-chrome-plugin', {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  }).then(resp => {
+    if (resp.status === 204) {
+      alert('Repository starred! Thank you.');
+    } else {
+      chrome.tabs.create({ url: repoUrl });
+    }
+  }).catch(() => {
+    chrome.tabs.create({ url: repoUrl });
+  });
+}
+
+/**
+ * Dismiss the GitHub star prompt.
+ */
+function dismissStarPrompt() {
+  const promptEl = document.getElementById('starPrompt');
+  if (promptEl) {
+    promptEl.style.display = 'none';
+    localStorage.setItem('starPromptDismissed', 'true');
+  }
 }
 
 
@@ -947,7 +1002,11 @@ function copySummaryToClipboard() {
     return;
   }
   navigator.clipboard.writeText(latestSummary)
-    .then(() => displayStatus('Summary copied to clipboard.'))
+    .then(() => {
+      displayStatus('Summary copied to clipboard.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      maybeShowStarPrompt();
+    })
     .catch(err => {
       console.error('Clipboard copy failed:', err);
       displayError('Failed to copy summary to clipboard.');

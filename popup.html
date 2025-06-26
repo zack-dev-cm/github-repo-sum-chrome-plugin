@@ -329,6 +329,18 @@
       margin-top: 5px;
       text-align: right;
     }
+    /* Star Prompt Styles */
+    #starPrompt {
+      display: none;
+      border: 1px solid var(--md-sys-color-outline);
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      background-color: var(--md-sys-color-surface-container-low);
+    }
+    #starPrompt button {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -418,6 +430,12 @@
   <div id="tokenCount" class="info-display" style="display:none;"></div>
 
   <div id="summaryPreview" style="display:none;"></div>
+
+  <div id="starPrompt">
+    <p>If you enjoy this extension, please consider starring the project on GitHub.</p>
+    <button id="starRepoBtn">Star on GitHub</button>
+    <button id="dismissStarPromptBtn">Dismiss</button>
+  </div>
 
   <!-- Feedback Section -->
   <div id="feedbackSection">
