@@ -402,6 +402,13 @@
     <input type="password" id="token" placeholder="GitHub Token">
   </div>
   <div class="form-group">
+    <label>
+      <input type="checkbox" id="useGoogleAuth">
+      Use Google Sign-In
+    </label>
+    <button id="googleSignInBtn" style="display:none; margin-top:10px;">Sign in with Google</button>
+  </div>
+  <div class="form-group">
     <label for="commit">Commit SHA or Branch (optional):</label>
     <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
     <select id="commitDropdown"></select>

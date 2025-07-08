@@ -18,11 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
   document.getElementById('copySummaryBtn').addEventListener('click', copySummaryToClipboard);
+  document.getElementById('useGoogleAuth').addEventListener('change', toggleAuthMethod);
+  document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
   const starBtn = document.getElementById('starRepoBtn');
   if (starBtn) starBtn.addEventListener('click', starRepo);
   const dismissBtn = document.getElementById('dismissStarPromptBtn');
   if (dismissBtn) dismissBtn.addEventListener('click', dismissStarPrompt);
   displayAppVersion(); // Display app version on load
+
+  // Initialize auth method UI
+  toggleAuthMethod();
 
   // Directory Controls
   document.getElementById('directorySearch').addEventListener('input', filterDirectories);
@@ -67,6 +72,31 @@ function loadToken() {
 function saveToken(token) {
   chrome.storage.local.set({ 'githubToken': token }, () => {
     console.log('GitHub token saved.');
+  });
+}
+
+/**
+ * Toggle between manual token entry and Google sign-in.
+ */
+function toggleAuthMethod() {
+  const useGoogle = document.getElementById('useGoogleAuth').checked;
+  document.getElementById('token').style.display = useGoogle ? 'none' : 'block';
+  document.getElementById('googleSignInBtn').style.display = useGoogle ? 'block' : 'none';
+}
+
+/**
+ * Request a GitHub OAuth token via the background service worker.
+ */
+function signInWithGoogle() {
+  chrome.runtime.sendMessage({ action: 'getGithubToken' }, response => {
+    if (response && response.token) {
+      document.getElementById('token').value = response.token;
+      saveToken(response.token);
+      displayStatus('GitHub token acquired via Google sign-in.');
+    } else {
+      const err = (response && response.error) || 'Authentication failed';
+      displayError(err);
+    }
   });
 }
 
