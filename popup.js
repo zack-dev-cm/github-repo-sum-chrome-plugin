@@ -9,9 +9,35 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * Replace __MSG_key__ placeholders in the HTML with localized strings.
+ */
+function localizeHtml() {
+  const elements = document.querySelectorAll('*');
+  elements.forEach(el => {
+    // Replace text content
+    if (el.childNodes.length === 1 && el.childNodes[0].nodeType === Node.TEXT_NODE) {
+      const match = el.textContent.trim().match(/^__MSG_(.+)__$/);
+      if (match) {
+        const msg = chrome.i18n.getMessage(match[1]);
+        if (msg) el.textContent = msg;
+      }
+    }
+    // Replace attributes containing placeholders
+    for (const attr of Array.from(el.attributes)) {
+      const attrMatch = attr.value.match(/^__MSG_(.+)__$/);
+      if (attrMatch) {
+        const msg = chrome.i18n.getMessage(attrMatch[1]);
+        if (msg) el.setAttribute(attr.name, msg);
+      }
+    }
+  });
+}
+
 let latestSummary = '';
 
 document.addEventListener('DOMContentLoaded', () => {
+  localizeHtml();
   initializeExtension();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
