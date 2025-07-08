@@ -4,6 +4,7 @@
   "name": "__MSG_extensionName__",
   "version": "1.4.2",
   "description": "__MSG_extensionDescription__",
+  "homepage_url": "https://github.com/zack-dev-cm/github-repo-sum-chrome-plugin/blob/main/PRIVACY.md",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://api.github.com/repos/*/*",

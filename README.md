@@ -201,4 +201,8 @@ Contributions are welcome! Please follow these steps:
 
 Your feedback is invaluable to us! If you have any suggestions, feature requests, or encounter any issues, please use the **Feedback Section** within the extension popup to share your thoughts. We strive to make the **GitHub Repo Summarizer** better with each update.
 
+## Privacy
+
+See [PRIVACY.md](PRIVACY.md) for details on what data the extension stores and how it is handled.
+
 ---
