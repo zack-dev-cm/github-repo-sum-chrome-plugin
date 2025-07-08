@@ -398,9 +398,17 @@
   </div>
 
   <div class="form-group">
+    <label for="authMethod">Authentication Method:</label>
+    <select id="authMethod">
+      <option value="manual" selected>Manual Token</option>
+      <option value="google">Google Sign-In</option>
+    </select>
+  </div>
+  <div class="form-group" id="manualTokenGroup">
     <label for="token">GitHub Token (optional):</label>
     <input type="password" id="token" placeholder="GitHub Token">
   </div>
+  <button id="googleSignInBtn" style="display:none;">Sign in with Google</button>
   <div class="form-group">
     <label for="commit">Commit SHA or Branch (optional):</label>
     <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
