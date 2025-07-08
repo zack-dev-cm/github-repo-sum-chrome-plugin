@@ -161,6 +161,15 @@
 
    - After making changes, go to `chrome://extensions/`, find the extension, and click **Reload**.
 
+### Running Tests
+
+End-to-end tests rely on [Puppeteer](https://pptr.dev/). Install dependencies and run the test suite with:
+
+```bash
+npm install
+npm test
+```
+
 ### Contributing
 
 Contributions are welcome! Please follow these steps:
