@@ -1,0 +1,12 @@
+{
+  "name": "github-repo-sum-chrome-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/e2e/basic.test.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^21.6.0"
+  }
+}
