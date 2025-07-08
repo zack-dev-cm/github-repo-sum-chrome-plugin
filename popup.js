@@ -33,6 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('token').addEventListener('input', (e) => {
     saveToken(e.target.value.trim());
   });
+
+  document.getElementById('authMethod').addEventListener('change', toggleAuthMethod);
+  const googleBtn = document.getElementById('googleSignInBtn');
+  if (googleBtn) googleBtn.addEventListener('click', signInWithGoogle);
+  toggleAuthMethod();
 });
 
 /**
@@ -1178,5 +1183,34 @@ function displayStatus(message) {
   loadingEl.style.display = 'none';
   errorEl.style.display = 'none';
   statusEl.textContent = message;
-  statusEl.style.display = 'block';
+  statusEl.style.display = 'block';}
+/**
+ * Toggle authentication method between manual token and Google sign-in.
+ */
+function toggleAuthMethod() {
+  const method = document.getElementById('authMethod').value;
+  const manualGroup = document.getElementById('manualTokenGroup');
+  const googleBtn = document.getElementById('googleSignInBtn');
+  if (method === 'google') {
+    manualGroup.style.display = 'none';
+    googleBtn.style.display = 'block';
+  } else {
+    manualGroup.style.display = 'block';
+    googleBtn.style.display = 'none';
+  }
 }
+
+/**
+ * Initiate Google sign-in to retrieve a GitHub OAuth token.
+ */
+function signInWithGoogle() {
+  chrome.runtime.sendMessage({ type: 'oauth' }, (response) => {
+    if (response && response.token) {
+      document.getElementById('token').value = response.token;
+      saveToken(response.token);
+    } else if (response && response.error) {
+      displayError('OAuth failed: ' + response.error);
+    }
+  });
+}
+

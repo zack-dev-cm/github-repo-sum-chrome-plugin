@@ -5,12 +5,20 @@
   "version": "1.4.2",
   "description": "__MSG_extensionDescription__",
   "homepage_url": "https://github.com/zack-dev-cm/github-repo-sum-chrome-plugin/blob/main/PRIVACY.md",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "identity"],
   "host_permissions": [
     "https://api.github.com/repos/*/*",
     "https://api.github.com/repos/*/*/git/trees/*",
-    "https://api.github.com/repos/*/*/git/blobs/*"
+    "https://api.github.com/repos/*/*/git/blobs/*",
+    "https://github.com/login/oauth/*"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "oauth2": {
+    "client_id": "YOUR_GOOGLE_CLIENT_ID",
+    "scopes": ["https://www.googleapis.com/auth/userinfo.email"]
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
