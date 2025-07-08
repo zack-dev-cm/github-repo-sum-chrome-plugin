@@ -1,0 +1,4 @@
+{
+  "extensionName": {"message": "GitHub Repo Summarizer"},
+  "extensionDescription": {"message": "Generate code summaries and download GitHub repositories."}
+}

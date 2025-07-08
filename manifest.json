@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "GitHub Repo Summarizer",
+  "default_locale": "en",
+  "name": "__MSG_extensionName__",
   "version": "1.4.2",
-  "description": "Generate code summaries and download GitHub repositories.",
+  "description": "__MSG_extensionDescription__",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://api.github.com/repos/*/*",
@@ -21,6 +22,6 @@
       "128": "icons/icon128.png"
     },
     "default_popup": "popup.html",
-    "default_title": "GitHub Repo Summarizer"
+    "default_title": "__MSG_extensionName__"
   }
 }
