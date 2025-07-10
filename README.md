@@ -10,7 +10,7 @@
 - **Code Summarization**: Extracts comments and function definitions from code files.
 - **Customizable File Types**: Supports a wide range of programming languages.
 - **GitHub API Integration**: Fetches repository data using the GitHub API.
-- **Personal Access Token Support**: Optionally use your GitHub token to increase API rate limits.
+- **Personal Access Token Support**: Optionally use your GitHub token to increase API rate limits and clear it at any time with the **Clear Token** button.
 - **Autoscrolling**: Automatically scrolls the popup window to display the summary immediately after generation.
 - **User Feedback Collection**: Provides a feedback form for users to suggest new features or report issues.
 
@@ -53,6 +53,7 @@
    - In the popup window, you can pick a commit from the dropdown or specify a branch name.
    - Click the **Summarize Repository** button to generate the summary.
    - Optionally, enter your GitHub Personal Access Token for higher rate limits.
+   - Click **Clear Token** in the popup to remove a stored token when you're done.
 
 4. **View the Summary**:
 

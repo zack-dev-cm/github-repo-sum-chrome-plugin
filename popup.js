@@ -33,6 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('token').addEventListener('input', (e) => {
     saveToken(e.target.value.trim());
   });
+
+  // Clear stored GitHub token when clear button is clicked
+  const clearTokenBtn = document.getElementById('clearTokenBtn');
+  if (clearTokenBtn) clearTokenBtn.addEventListener('click', clearToken);
 });
 
 /**
@@ -67,6 +71,16 @@ function loadToken() {
 function saveToken(token) {
   chrome.storage.local.set({ 'githubToken': token }, () => {
     console.log('GitHub token saved.');
+  });
+}
+
+/**
+ * Clear the GitHub token from Chrome storage.
+ */
+function clearToken() {
+  chrome.storage.local.remove('githubToken', () => {
+    document.getElementById('token').value = '';
+    console.log('GitHub token cleared.');
   });
 }
 
