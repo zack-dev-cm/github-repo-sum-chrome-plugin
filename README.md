@@ -214,4 +214,8 @@ Your feedback is invaluable to us! If you have any suggestions, feature requests
 
 See [PRIVACY.md](PRIVACY.md) for details on what data the extension stores and how it is handled.
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ---
