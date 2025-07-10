@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GitHub Repo Summarizer</title>
+  <title>__MSG_extensionName__</title>
   <style>
     /* Reset and Base Styles */
     * {
@@ -353,11 +353,11 @@
   </style>
 </head>
 <body>
-  <h2>GitHub Repo Summarizer</h2>
+  <h2 data-i18n="extensionName">__MSG_extensionName__</h2>
 
   <div class="form-group">
-    <label for="extensions">File Extensions to Include:</label>
-    <input type="text" id="extensions" placeholder=".py, .js, .md" value=".js, .py, .java, .cpp, .md">
+    <label for="extensions" data-i18n="labelExtensions">__MSG_labelExtensions__</label>
+    <input type="text" id="extensions" data-i18n-placeholder="extensionsPlaceholder" placeholder="__MSG_extensionsPlaceholder__" value=".js, .py, .java, .cpp, .md">
   </div>
   <div class="form-group">
     <div id="repoSize" class="info-display" style="display:none;"></div>
@@ -366,82 +366,82 @@
   <div class="form-group">
     <!-- Set the 'checked' attribute to make it enabled by default -->
     <input type="checkbox" id="saveSettings" checked>
-    <label for="saveSettings">Save settings for this repository</label>
+    <label for="saveSettings" data-i18n="labelSaveSettings">__MSG_labelSaveSettings__</label>
   </div>
 
-  <button id="advancedSettingsBtn">Advanced Settings</button>
+  <button id="advancedSettingsBtn" data-i18n="advancedSettingsShow">__MSG_advancedSettingsShow__</button>
 
   <div id="advancedSettings">
-    <button id="preScanBtn">Pre-scan Repository</button>
+    <button id="preScanBtn" data-i18n="preScanBtn">__MSG_preScanBtn__</button>
     <div class="form-group">
-      <label>Available Extensions in Repository:</label>
-      <div id="availableExtensions">Scanning...</div>
+      <label data-i18n="labelAvailableExtensions">__MSG_labelAvailableExtensions__</label>
+      <div id="availableExtensions" data-i18n="scanningText">__MSG_scanningText__</div>
     </div>
     <div class="form-group">
-      <label for="maxChars">Max Characters per File (0 for no limit):</label>
-      <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
+      <label for="maxChars" data-i18n="labelMaxChars">__MSG_labelMaxChars__</label>
+      <input type="number" id="maxChars" min="0" data-i18n-placeholder="maxCharsPlaceholder" placeholder="__MSG_maxCharsPlaceholder__" value="0">
     </div>
     <!-- Directory Selection Section -->
     <div class="form-group">
-      <label for="directories">Select Directories to Include:</label>
+      <label for="directories" data-i18n="labelDirectories">__MSG_labelDirectories__</label>
       <div id="directoryControls">
-        <input type="text" id="directorySearch" placeholder="Search directories...">
+        <input type="text" id="directorySearch" data-i18n-placeholder="directorySearchPlaceholder" placeholder="__MSG_directorySearchPlaceholder__">
         <div id="selectAllContainer">
           <input type="checkbox" id="selectAllDirectories" checked>
-          <label for="selectAllDirectories" style="margin:0;">Select All</label>
-          <button id="clearSelectionBtn" title="Clear All Selections">Clear</button>
+          <label for="selectAllDirectories" style="margin:0;" data-i18n="selectAll">__MSG_selectAll__</label>
+          <button id="clearSelectionBtn" data-i18n="clear" data-i18n-title="clearSelectionTitle" title="__MSG_clearSelectionTitle__">__MSG_clear__</button>
         </div>
       </div>
-      <div id="directoriesContainer">Scanning...</div>
-      <div id="selectedCount">Selected: 0</div>
+      <div id="directoriesContainer" data-i18n="scanningText">__MSG_scanningText__</div>
+      <div id="selectedCount" data-i18n="selectedCountInitial">__MSG_selectedCountInitial__</div>
     </div>
   </div>
 
   <div class="form-group">
-    <label for="authMethod">Authentication Method:</label>
+    <label for="authMethod" data-i18n="labelAuthMethod">__MSG_labelAuthMethod__</label>
     <select id="authMethod">
-      <option value="manual" selected>Manual Token</option>
-      <option value="google">Google Sign-In</option>
+      <option value="manual" selected data-i18n="optionManual">__MSG_optionManual__</option>
+      <option value="google" data-i18n="optionGoogle">__MSG_optionGoogle__</option>
     </select>
   </div>
   <div class="form-group" id="manualTokenGroup">
-    <label for="token">GitHub Token (optional):</label>
-    <input type="password" id="token" placeholder="GitHub Token">
+    <label for="token" data-i18n="labelToken">__MSG_labelToken__</label>
+    <input type="password" id="token" data-i18n-placeholder="tokenPlaceholder" placeholder="__MSG_tokenPlaceholder__">
   </div>
-  <button id="googleSignInBtn" style="display:none;">Sign in with Google</button>
+  <button id="googleSignInBtn" style="display:none;" data-i18n="googleSignInBtn">__MSG_googleSignInBtn__</button>
   <div class="form-group">
-    <label for="commit">Commit SHA or Branch (optional):</label>
-    <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
+    <label for="commit" data-i18n="labelCommit">__MSG_labelCommit__</label>
+    <input type="text" id="commit" data-i18n-placeholder="commitPlaceholder" placeholder="__MSG_commitPlaceholder__">
     <select id="commitDropdown"></select>
   </div>
 
   <div class="checkbox-group">
-    <label>Include in Summary:</label>
+    <label data-i18n="labelInclude">__MSG_labelInclude__</label>
     <label for="includeContent">
       <input type="checkbox" id="includeContent" checked>
-      File Names and Content
+      <span data-i18n="includeContent">__MSG_includeContent__</span>
     </label>
     <label for="includeTree">
       <input type="checkbox" id="includeTree" checked>
-      Directory Tree Structure
+      <span data-i18n="includeTree">__MSG_includeTree__</span>
     </label>
   </div>
 
-  <button id="summarizeBtn">Summarize Repository</button>
+  <button id="summarizeBtn" data-i18n="summarizeBtn">__MSG_summarizeBtn__</button>
 
   <div id="status" style="display:none;"></div>
   <div id="error" style="display:none;"></div>
 
   <div class="loading" id="loading" style="display:none;">
-    <img src="spinner.gif" alt="Loading">
-    <span>Processing...</span>
+    <img src="spinner.gif" alt="__MSG_loadingAlt__" data-i18n-alt="loadingAlt">
+    <span data-i18n="processingText">__MSG_processingText__</span>
   </div>
 
   <div id="downloadLink" style="display:none;">
-    <a href="#" id="downloadFileLink">Download Combined File</a>
+    <a href="#" id="downloadFileLink" data-i18n="downloadCombinedFile">__MSG_downloadCombinedFile__</a>
   </div>
 
-  <button id="copySummaryBtn" style="display:none;">Copy Summary to Clipboard</button>
+  <button id="copySummaryBtn" style="display:none;" data-i18n="copySummaryBtn">__MSG_copySummaryBtn__</button>
 
   <div id="fileSize" class="info-display" style="display:none;"></div>
   <div id="tokenCount" class="info-display" style="display:none;"></div>
@@ -449,27 +449,27 @@
   <div id="summaryPreview" style="display:none;"></div>
 
   <div id="starPrompt">
-    <p>If you enjoy this extension, please consider starring the project on GitHub.</p>
-    <button id="starRepoBtn">Star on GitHub</button>
-    <button id="dismissStarPromptBtn">Dismiss</button>
+    <p data-i18n="starPromptMessage">__MSG_starPromptMessage__</p>
+    <button id="starRepoBtn" data-i18n="starRepoBtn">__MSG_starRepoBtn__</button>
+    <button id="dismissStarPromptBtn" data-i18n="dismissStarPromptBtn">__MSG_dismissStarPromptBtn__</button>
   </div>
 
   <!-- Feedback Section -->
   <div id="feedbackSection">
-    <h3>We Value Your Feedback!</h3>
+    <h3 data-i18n="feedbackHeading">__MSG_feedbackHeading__</h3>
     <a href="https://chromewebstore.google.com/detail/github-repo-summarizer/ccikgbjalcbokaalidnfcjhhbhjoljfm" target="_blank">
-      Star on Chrome Web Store
+      <span data-i18n="starOnChromeWebStore">__MSG_starOnChromeWebStore__</span>
     </a>
     <div class="form-group">
-      <textarea id="feedback" placeholder="Tell us what features you'd like to see or what you don't like..."></textarea>
+      <textarea id="feedback" data-i18n-placeholder="feedbackPlaceholder" placeholder="__MSG_feedbackPlaceholder__"></textarea>
     </div>
 
-    <button id="submitFeedbackBtn">Submit Feedback</button>
+    <button id="submitFeedbackBtn" data-i18n="submitFeedbackBtn">__MSG_submitFeedbackBtn__</button>
   </div>
 
 
   <!-- App Version Display -->
-  <div id="appVersion">Version: Loading...</div>
+  <div id="appVersion" data-i18n="versionLoading">__MSG_versionLoading__</div>
 
   <script src="popup.js"></script>
 </body>

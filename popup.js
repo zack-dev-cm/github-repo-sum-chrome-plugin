@@ -11,7 +11,27 @@ function escapeRegExp(string) {
 
 let latestSummary = '';
 
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const msg = chrome.i18n.getMessage(el.dataset.i18n);
+    if (msg) el.textContent = msg;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const msg = chrome.i18n.getMessage(el.dataset.i18nPlaceholder);
+    if (msg) el.placeholder = msg;
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const msg = chrome.i18n.getMessage(el.dataset.i18nTitle);
+    if (msg) el.title = msg;
+  });
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+    const msg = chrome.i18n.getMessage(el.dataset.i18nAlt);
+    if (msg) el.alt = msg;
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  applyI18n();
   initializeExtension();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
@@ -174,10 +194,10 @@ function toggleAdvancedSettings() {
   const advancedSettings = document.getElementById('advancedSettings');
   if (advancedSettings.style.display === 'none' || advancedSettings.style.display === '') {
     advancedSettings.style.display = 'block';
-    document.getElementById('advancedSettingsBtn').textContent = 'Hide Advanced Settings';
+    document.getElementById('advancedSettingsBtn').textContent = chrome.i18n.getMessage('advancedSettingsHide');
   } else {
     advancedSettings.style.display = 'none';
-    document.getElementById('advancedSettingsBtn').textContent = 'Advanced Settings';
+    document.getElementById('advancedSettingsBtn').textContent = chrome.i18n.getMessage('advancedSettingsShow');
   }
 }
 
@@ -315,9 +335,10 @@ async function preScanRepo() {
   const directoriesContainerEl = document.getElementById('directoriesContainer');
   const selectedCountEl = document.getElementById('selectedCount');
   errorEl.style.display = 'none';
-  availableExtensionsEl.innerHTML = 'Scanning...';
-  directoriesContainerEl.innerHTML = 'Scanning...';
-  selectedCountEl.textContent = 'Selected: 0';
+  const scanningText = chrome.i18n.getMessage('scanningText');
+  availableExtensionsEl.innerHTML = scanningText;
+  directoriesContainerEl.innerHTML = scanningText;
+  selectedCountEl.textContent = chrome.i18n.getMessage('selectedCount', '0');
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -436,7 +457,7 @@ async function preScanRepo() {
           document.getElementById('selectAllContainer').style.display = 'none';
           document.getElementById('directorySearch').style.display = 'none';
           document.getElementById('clearSelectionBtn').style.display = 'none';
-          selectedCountEl.textContent = 'Selected: 0';
+          selectedCountEl.textContent = chrome.i18n.getMessage('selectedCount', '0');
         }
 
         // After populating extensions and directories, update the main extensions field
@@ -1086,7 +1107,7 @@ function displayAppVersion() {
   const versionEl = document.getElementById('appVersion');
   if (versionEl) {
     const manifestData = chrome.runtime.getManifest();
-    versionEl.textContent = `Version: ${manifestData.version}`;
+    versionEl.textContent = chrome.i18n.getMessage('versionPrefix', manifestData.version);
   }
 }
 
@@ -1096,7 +1117,7 @@ function displayAppVersion() {
 function updateSelectedCount() {
   const selectedCountEl = document.getElementById('selectedCount');
   const selected = getSelectedDirectories().length;
-  selectedCountEl.textContent = `Selected: ${selected}`;
+  selectedCountEl.textContent = chrome.i18n.getMessage('selectedCount', selected.toString());
 }
 
 /**
