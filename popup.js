@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('preScanBtn').addEventListener('click', preScanRepo);
   document.getElementById('submitFeedbackBtn').addEventListener('click', submitFeedback);
   document.getElementById('copySummaryBtn').addEventListener('click', copySummaryToClipboard);
+  document.getElementById('clearTokenBtn').addEventListener('click', clearToken);
   const starBtn = document.getElementById('starRepoBtn');
   if (starBtn) starBtn.addEventListener('click', starRepo);
   const dismissBtn = document.getElementById('dismissStarPromptBtn');
@@ -72,6 +73,16 @@ function loadToken() {
 function saveToken(token) {
   chrome.storage.local.set({ 'githubToken': token }, () => {
     console.log('GitHub token saved.');
+  });
+}
+
+/**
+ * Remove the GitHub token from Chrome storage.
+ */
+function clearToken() {
+  chrome.storage.local.remove('githubToken', () => {
+    document.getElementById('token').value = '';
+    console.log('GitHub token cleared.');
   });
 }
 
