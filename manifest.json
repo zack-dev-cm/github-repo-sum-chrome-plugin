@@ -3,7 +3,6 @@
   "default_locale": "en",
   "name": "__MSG_extensionName__",
   "version": "1.4.3",
-  "homepage_url": "https://github.com/zack-dev-cm/github-repo-sum-chrome-plugin",
   "support_url": "https://github.com/zack-dev-cm/github-repo-sum-chrome-plugin/issues",
   "description": "__MSG_extensionDescription__",
   "homepage_url": "https://github.com/zack-dev-cm/github-repo-sum-chrome-plugin/blob/main/PRIVACY.md",
