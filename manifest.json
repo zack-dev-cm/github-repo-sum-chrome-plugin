@@ -17,8 +17,10 @@
     "service_worker": "background.js"
   },
   "oauth2": {
-    "client_id": "YOUR_GOOGLE_CLIENT_ID",
-    "scopes": ["https://www.googleapis.com/auth/userinfo.email"]
+    "client_id": "1095464065298-0ah8og6sc137kvdja09bi9ka6gh9smid.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email"
+    ]
   },
   "icons": {
     "16": "icons/icon16.png",
