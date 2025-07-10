@@ -53,6 +53,7 @@
    - In the popup window, you can pick a commit from the dropdown or specify a branch name.
    - Click the **Summarize Repository** button to generate the summary.
    - Optionally, enter your GitHub Personal Access Token for higher rate limits.
+   - Use the **Clear Token** button to remove your stored token.
 
 4. **View the Summary**:
 
