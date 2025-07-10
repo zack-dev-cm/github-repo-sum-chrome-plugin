@@ -9,9 +9,20 @@ function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * Replace __MSG_***__ placeholders in the HTML with localized strings.
+ */
+function localizeHtmlPage() {
+  const html = document.documentElement.innerHTML;
+  document.documentElement.innerHTML = html.replace(/__MSG_(\w+)__/g, (match, key) => {
+    return chrome.i18n.getMessage(key) || match;
+  });
+}
+
 let latestSummary = '';
 
 document.addEventListener('DOMContentLoaded', () => {
+  localizeHtmlPage();
   initializeExtension();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
@@ -185,10 +196,10 @@ function toggleAdvancedSettings() {
   const advancedSettings = document.getElementById('advancedSettings');
   if (advancedSettings.style.display === 'none' || advancedSettings.style.display === '') {
     advancedSettings.style.display = 'block';
-    document.getElementById('advancedSettingsBtn').textContent = 'Hide Advanced Settings';
+    document.getElementById('advancedSettingsBtn').textContent = chrome.i18n.getMessage('hideAdvancedSettings');
   } else {
     advancedSettings.style.display = 'none';
-    document.getElementById('advancedSettingsBtn').textContent = 'Advanced Settings';
+    document.getElementById('advancedSettingsBtn').textContent = chrome.i18n.getMessage('advancedSettings');
   }
 }
 
@@ -326,9 +337,9 @@ async function preScanRepo() {
   const directoriesContainerEl = document.getElementById('directoriesContainer');
   const selectedCountEl = document.getElementById('selectedCount');
   errorEl.style.display = 'none';
-  availableExtensionsEl.innerHTML = 'Scanning...';
-  directoriesContainerEl.innerHTML = 'Scanning...';
-  selectedCountEl.textContent = 'Selected: 0';
+  availableExtensionsEl.innerHTML = chrome.i18n.getMessage('scanning');
+  directoriesContainerEl.innerHTML = chrome.i18n.getMessage('scanning');
+  selectedCountEl.textContent = `${chrome.i18n.getMessage('selectedCountPrefix')} 0`;
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -447,7 +458,7 @@ async function preScanRepo() {
           document.getElementById('selectAllContainer').style.display = 'none';
           document.getElementById('directorySearch').style.display = 'none';
           document.getElementById('clearSelectionBtn').style.display = 'none';
-          selectedCountEl.textContent = 'Selected: 0';
+          selectedCountEl.textContent = `${chrome.i18n.getMessage('selectedCountPrefix')} 0`;
         }
 
         // After populating extensions and directories, update the main extensions field
@@ -727,7 +738,7 @@ async function processRepo() {
 
         createDownloadableFile(finalContent, repoInfo.repo);
         loadingEl.style.display = 'none';
-        displayStatus('File ready for download.');
+        displayStatus(chrome.i18n.getMessage('fileReady'));
         downloadLinkContainer.style.display = 'block';
 
         // Display file size
@@ -1009,17 +1020,17 @@ function createDownloadableFile(content, repoName) {
   const downloadFileLink = document.getElementById('downloadFileLink');
   downloadFileLink.href = url;
   downloadFileLink.download = `${repoName}-code-summary.txt`;
-  downloadFileLink.textContent = `Download ${repoName} Code Summary`;
+  downloadFileLink.textContent = chrome.i18n.getMessage('downloadLink');
 }
 
 function copySummaryToClipboard() {
   if (!latestSummary) {
-    displayError('No summary available to copy.');
+    displayError(chrome.i18n.getMessage('noSummaryError'));
     return;
   }
   navigator.clipboard.writeText(latestSummary)
     .then(() => {
-      displayStatus('Summary copied to clipboard.');
+      displayStatus(chrome.i18n.getMessage('summaryCopied'));
       const statusEl = document.getElementById('status');
       statusEl.classList.add('highlight');
       statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1030,7 +1041,7 @@ function copySummaryToClipboard() {
     })
     .catch(err => {
       console.error('Clipboard copy failed:', err);
-      displayError('Failed to copy summary to clipboard.');
+      displayError(chrome.i18n.getMessage('copyFailed'));
     });
 }
 
@@ -1097,7 +1108,7 @@ function displayAppVersion() {
   const versionEl = document.getElementById('appVersion');
   if (versionEl) {
     const manifestData = chrome.runtime.getManifest();
-    versionEl.textContent = `Version: ${manifestData.version}`;
+    versionEl.textContent = `${chrome.i18n.getMessage('versionLabel')} ${manifestData.version}`;
   }
 }
 
@@ -1107,7 +1118,7 @@ function displayAppVersion() {
 function updateSelectedCount() {
   const selectedCountEl = document.getElementById('selectedCount');
   const selected = getSelectedDirectories().length;
-  selectedCountEl.textContent = `Selected: ${selected}`;
+  selectedCountEl.textContent = `${chrome.i18n.getMessage('selectedCountPrefix')} ${selected}`;
 }
 
 /**

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GitHub Repo Summarizer</title>
+  <title>__MSG_extensionName__</title>
   <style>
     /* Reset and Base Styles */
     * {
@@ -353,11 +353,11 @@
   </style>
 </head>
 <body>
-  <h2>GitHub Repo Summarizer</h2>
+  <h2>__MSG_extensionName__</h2>
 
   <div class="form-group">
-    <label for="extensions">File Extensions to Include:</label>
-    <input type="text" id="extensions" placeholder=".py, .js, .md" value=".js, .py, .java, .cpp, .md">
+    <label for="extensions">__MSG_extensionsLabel__</label>
+    <input type="text" id="extensions" placeholder="__MSG_extensionsPlaceholder__" value=".js, .py, .java, .cpp, .md">
   </div>
   <div class="form-group">
     <div id="repoSize" class="info-display" style="display:none;"></div>
@@ -366,83 +366,83 @@
   <div class="form-group">
     <!-- Set the 'checked' attribute to make it enabled by default -->
     <input type="checkbox" id="saveSettings" checked>
-    <label for="saveSettings">Save settings for this repository</label>
+    <label for="saveSettings">__MSG_saveSettingsLabel__</label>
   </div>
 
-  <button id="advancedSettingsBtn">Advanced Settings</button>
+  <button id="advancedSettingsBtn">__MSG_advancedSettings__</button>
 
   <div id="advancedSettings">
-    <button id="preScanBtn">Pre-scan Repository</button>
+    <button id="preScanBtn">__MSG_preScan__</button>
     <div class="form-group">
-      <label>Available Extensions in Repository:</label>
-      <div id="availableExtensions">Scanning...</div>
+      <label>__MSG_availableExtensionsLabel__</label>
+      <div id="availableExtensions">__MSG_scanning__</div>
     </div>
     <div class="form-group">
-      <label for="maxChars">Max Characters per File (0 for no limit):</label>
-      <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
+      <label for="maxChars">__MSG_maxCharsLabel__</label>
+      <input type="number" id="maxChars" min="0" placeholder="__MSG_maxCharsPlaceholder__" value="0">
     </div>
     <!-- Directory Selection Section -->
     <div class="form-group">
-      <label for="directories">Select Directories to Include:</label>
+      <label for="directories">__MSG_directoriesLabel__</label>
       <div id="directoryControls">
-        <input type="text" id="directorySearch" placeholder="Search directories...">
+        <input type="text" id="directorySearch" placeholder="__MSG_directorySearchPlaceholder__">
         <div id="selectAllContainer">
           <input type="checkbox" id="selectAllDirectories" checked>
-          <label for="selectAllDirectories" style="margin:0;">Select All</label>
-          <button id="clearSelectionBtn" title="Clear All Selections">Clear</button>
+          <label for="selectAllDirectories" style="margin:0;">__MSG_selectAllLabel__</label>
+          <button id="clearSelectionBtn" title="__MSG_clearTitle__">__MSG_clearButton__</button>
         </div>
       </div>
-      <div id="directoriesContainer">Scanning...</div>
-      <div id="selectedCount">Selected: 0</div>
+      <div id="directoriesContainer">__MSG_scanning__</div>
+      <div id="selectedCount">__MSG_selectedCountPrefix__ 0</div>
     </div>
   </div>
 
   <div class="form-group">
-    <label for="authMethod">Authentication Method:</label>
+    <label for="authMethod">__MSG_authMethodLabel__</label>
     <select id="authMethod">
-      <option value="manual" selected>Manual Token</option>
-      <option value="google">Google Sign-In</option>
+      <option value="manual" selected>__MSG_manualToken__</option>
+      <option value="google">__MSG_googleSignIn__</option>
     </select>
   </div>
   <div class="form-group" id="manualTokenGroup">
-    <label for="token">GitHub Token (optional):</label>
-    <input type="password" id="token" placeholder="GitHub Token">
-    <button id="clearTokenBtn" type="button">Clear Token</button>
+    <label for="token">__MSG_tokenLabel__</label>
+    <input type="password" id="token" placeholder="__MSG_tokenPlaceholder__">
+    <button id="clearTokenBtn" type="button">__MSG_clearToken__</button>
   </div>
-  <button id="googleSignInBtn" style="display:none;">Sign in with Google</button>
+  <button id="googleSignInBtn" style="display:none;">__MSG_googleSignInButton__</button>
   <div class="form-group">
-    <label for="commit">Commit SHA or Branch (optional):</label>
-    <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
+    <label for="commit">__MSG_commitLabel__</label>
+    <input type="text" id="commit" placeholder="__MSG_commitPlaceholder__">
     <select id="commitDropdown"></select>
   </div>
 
   <div class="checkbox-group">
-    <label>Include in Summary:</label>
+    <label>__MSG_includeInSummary__</label>
     <label for="includeContent">
       <input type="checkbox" id="includeContent" checked>
-      File Names and Content
+      __MSG_includeContent__
     </label>
     <label for="includeTree">
       <input type="checkbox" id="includeTree" checked>
-      Directory Tree Structure
+      __MSG_includeTree__
     </label>
   </div>
 
-  <button id="summarizeBtn">Summarize Repository</button>
+  <button id="summarizeBtn">__MSG_summarizeRepo__</button>
 
   <div id="status" style="display:none;"></div>
   <div id="error" style="display:none;"></div>
 
   <div class="loading" id="loading" style="display:none;">
-    <img src="spinner.gif" alt="Loading">
-    <span>Processing...</span>
+    <img src="spinner.gif" alt="__MSG_loadingAlt__">
+    <span>__MSG_processingText__</span>
   </div>
 
   <div id="downloadLink" style="display:none;">
-    <a href="#" id="downloadFileLink">Download Combined File</a>
+    <a href="#" id="downloadFileLink">__MSG_downloadLink__</a>
   </div>
 
-  <button id="copySummaryBtn" style="display:none;">Copy Summary to Clipboard</button>
+  <button id="copySummaryBtn" style="display:none;">__MSG_copySummary__</button>
 
   <div id="fileSize" class="info-display" style="display:none;"></div>
   <div id="tokenCount" class="info-display" style="display:none;"></div>
@@ -450,27 +450,27 @@
   <div id="summaryPreview" style="display:none;"></div>
 
   <div id="starPrompt">
-    <p>If you enjoy this extension, please consider starring the project on GitHub.</p>
-    <button id="starRepoBtn">Star on GitHub</button>
-    <button id="dismissStarPromptBtn">Dismiss</button>
+    <p>__MSG_starPromptMessage__</p>
+    <button id="starRepoBtn">__MSG_starOnGitHub__</button>
+    <button id="dismissStarPromptBtn">__MSG_dismiss__</button>
   </div>
 
   <!-- Feedback Section -->
   <div id="feedbackSection">
-    <h3>We Value Your Feedback!</h3>
+    <h3>__MSG_feedbackHeading__</h3>
     <a href="https://chromewebstore.google.com/detail/github-repo-summarizer/ccikgbjalcbokaalidnfcjhhbhjoljfm" target="_blank">
-      Star on Chrome Web Store
+      __MSG_starOnWebStore__
     </a>
     <div class="form-group">
-      <textarea id="feedback" placeholder="Tell us what features you'd like to see or what you don't like..."></textarea>
+      <textarea id="feedback" placeholder="__MSG_feedbackPlaceholder__"></textarea>
     </div>
 
-    <button id="submitFeedbackBtn">Submit Feedback</button>
+    <button id="submitFeedbackBtn">__MSG_submitFeedback__</button>
   </div>
 
 
   <!-- App Version Display -->
-  <div id="appVersion">Version: Loading...</div>
+  <div id="appVersion">__MSG_versionLabel__ __MSG_loading__</div>
 
   <script src="popup.js"></script>
 </body>
