@@ -108,8 +108,9 @@
 
 - **Large Repositories**:
   
-  - The extension may have difficulty processing very large repositories.
-  - Files larger than 100 KB are skipped to improve performance.
+- The extension may have difficulty processing very large repositories.
+- Files larger than 100 KB are skipped to improve performance.
+- If any files are skipped, their names are listed in the popup after summarization.
 
 - **Autoscroll Behavior**:
   
