@@ -335,8 +335,9 @@ async function preScanRepo() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       try {
-        const commit = document.getElementById('commit').value.trim();
-        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo, commit);
+        const commitInput = document.getElementById('commit').value.trim();
+        const ref = commitInput || await getDefaultBranch(repoInfo.owner, repoInfo.repo);
+        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo, ref);
         // Extract extensions and counts
         const extensionCounts = {};
         const excludedExtensions = [
@@ -568,6 +569,13 @@ async function getRepoSize(owner, repo) {
   return repoData.size / 1024; // Convert size from KB to MB
 }
 
+// Fetch repository default branch
+async function getDefaultBranch(owner, repo) {
+  const response = await fetchWithToken(`https://api.github.com/repos/${owner}/${repo}`);
+  const repoData = await response.json();
+  return repoData.default_branch;
+}
+
 // Fetch recent commits for a repository
 async function fetchRecentCommits(owner, repo, limit = 10) {
   const response = await fetchWithToken(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=${limit}`);
@@ -646,8 +654,9 @@ async function processRepo() {
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (repoInfo) {
       try {
-        const commit = document.getElementById('commit').value.trim();
-        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo, commit);
+        const commitInput = document.getElementById('commit').value.trim();
+        const ref = commitInput || await getDefaultBranch(repoInfo.owner, repoInfo.repo);
+        const files = await fetchRepoTree(repoInfo.owner, repoInfo.repo, ref);
 
         // Fetch repository size and display it
         const repoSizeMB = await getRepoSize(repoInfo.owner, repoInfo.repo);
@@ -708,7 +717,7 @@ async function processRepo() {
           }
         }
 
-        const { filesContent: contents, skippedFiles } = await fetchFilesContent(codeFiles, maxChars);
+        const { filesContent: contents, skippedFiles } = await fetchFilesContent(codeFiles, maxChars, repoInfo.owner, repoInfo.repo, ref);
 
         let finalContent = '';
         let combinedContent = '';
@@ -927,9 +936,12 @@ function identifyLargeFiles(files) {
  * Fetch content of selected files.
  * @param {Array} files - The filtered repository files.
  * @param {number} maxChars - Maximum characters per file.
+ * @param {string} owner - Repository owner.
+ * @param {string} repo - Repository name.
+ * @param {string} ref - Commit SHA or branch name.
  * @returns {Promise<Array>} - Array of file contents.
  */
-function fetchFilesContent(files, maxChars) {
+function fetchFilesContent(files, maxChars, owner, repo, ref) {
   if (!files || !Array.isArray(files) || files.length === 0) {
     return Promise.resolve({ filesContent: [], skippedFiles: [] });
   }
@@ -947,7 +959,13 @@ function fetchFilesContent(files, maxChars) {
         return response.json();
       })
       .then(blobData => {
-        if (blobData && blobData.size <= MAX_FILE_SIZE && blobData.content) {
+        if (!blobData || blobData.size > MAX_FILE_SIZE) {
+          console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
+          skippedFiles.push(file.path);
+          return null;
+        }
+
+        if (blobData.content) {
           let content = atob(blobData.content.replace(/\n/g, ''));
           if (maxChars > 0 && content.length > maxChars * 2) {
             const startContent = content.substring(0, maxChars);
@@ -955,11 +973,27 @@ function fetchFilesContent(files, maxChars) {
             content = startContent + '\n\n...\n\n' + endContent;
           }
           return { path: file.path, content };
-        } else {
-          console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
-          skippedFiles.push(file.path);
-          return null;
         }
+
+        return fetchWithToken(`https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${file.path}`)
+          .then(rawResponse => {
+            if (!rawResponse.ok) {
+              console.warn(`Failed to fetch raw ${file.path}: ${rawResponse.status} ${rawResponse.statusText}`);
+              skippedFiles.push(file.path);
+              return null;
+            }
+            return rawResponse.text();
+          })
+          .then(rawContent => {
+            if (rawContent === null) return null;
+            let content = rawContent;
+            if (maxChars > 0 && content.length > maxChars * 2) {
+              const startContent = content.substring(0, maxChars);
+              const endContent = content.substring(content.length - maxChars);
+              content = startContent + '\n\n...\n\n' + endContent;
+            }
+            return { path: file.path, content };
+          });
       })
       .catch(error => {
         console.warn(`Error fetching ${file.path}: ${error.message}`);
