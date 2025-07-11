@@ -819,8 +819,8 @@ async function processRepo() {
           } else {
             message += ` (${displayList}, ...)`;
           }
-          skippedFilesEl.textContent = message;
-          skippedFilesEl.style.display = 'block';
+          console.warn(message);
+          skippedFilesEl.style.display = 'none';
         }
 
         // Show summary preview (first 100 chars and last 100 chars)
