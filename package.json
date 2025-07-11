@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "puppeteer": "^21.6.0"
+  },
+  "dependencies": {
+    "p-limit": "^6.2.0"
   }
 }

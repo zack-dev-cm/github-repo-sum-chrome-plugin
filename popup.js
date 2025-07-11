@@ -936,38 +936,44 @@ function fetchFilesContent(files, maxChars) {
 
   const skippedFiles = [];
   const MAX_FILE_SIZE = 500000; // 500 KB
-  const fetches = files.map(file => {
-    return fetchWithToken(file.url)
-      .then(response => {
-        if (!response.ok) {
-          console.warn(`Failed to fetch ${file.path}: ${response.status} ${response.statusText}`);
-          skippedFiles.push(file.path);
-          return null;
-        }
-        return response.json();
-      })
-      .then(blobData => {
-        if (blobData && blobData.size <= MAX_FILE_SIZE && blobData.content) {
-          let content = atob(blobData.content.replace(/\n/g, ''));
-          if (maxChars > 0 && content.length > maxChars * 2) {
-            const startContent = content.substring(0, maxChars);
-            const endContent = content.substring(content.length - maxChars);
-            content = startContent + '\n\n...\n\n' + endContent;
-          }
-          return { path: file.path, content };
-        } else {
-          console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
-          skippedFiles.push(file.path);
-          return null;
-        }
-      })
-      .catch(error => {
-        console.warn(`Error fetching ${file.path}: ${error.message}`);
-        skippedFiles.push(file.path);
-        return null;
-      });
-  });
-  return Promise.all(fetches).then(results => ({
+
+  return import('p-limit').then(({ default: pLimit }) => {
+    const limit = pLimit(5);
+    const limitedFetches = files.map(file =>
+      limit(() =>
+        fetchWithToken(file.url)
+          .then(response => {
+            if (!response.ok) {
+              console.warn(`Failed to fetch ${file.path}: ${response.status} ${response.statusText}`);
+              skippedFiles.push(file.path);
+              return null;
+            }
+            return response.json();
+          })
+          .then(blobData => {
+            if (blobData && blobData.size <= MAX_FILE_SIZE && blobData.content) {
+              let content = atob(blobData.content.replace(/\n/g, ''));
+              if (maxChars > 0 && content.length > maxChars * 2) {
+                const startContent = content.substring(0, maxChars);
+                const endContent = content.substring(content.length - maxChars);
+                content = startContent + '\n\n...\n\n' + endContent;
+              }
+              return { path: file.path, content };
+            } else {
+              console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
+              skippedFiles.push(file.path);
+              return null;
+            }
+          })
+          .catch(error => {
+            console.warn(`Error fetching ${file.path}: ${error.message}`);
+            skippedFiles.push(file.path);
+            return null;
+          })
+      )
+    );
+    return Promise.all(limitedFetches);
+  }).then(results => ({
     filesContent: results.filter(item => item !== null),
     skippedFiles
   }));

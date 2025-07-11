@@ -111,6 +111,7 @@
 - The extension may have difficulty processing very large repositories.
 - Files larger than 100 KB are skipped to improve performance.
 - If any files are skipped, their names are listed in the popup after summarization.
+- Fetching file contents is limited to five concurrent requests to avoid hitting rate limits.
 
 - **Autoscroll Behavior**:
   
