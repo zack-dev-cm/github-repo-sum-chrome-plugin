@@ -120,6 +120,15 @@
       text-decoration: underline;
     }
 
+    /* Authentication Section */
+    #authDetails summary {
+      cursor: pointer;
+      margin-top: 10px;
+      color: var(--md-sys-color-primary);
+      font-size: 14px;
+      text-decoration: underline;
+    }
+
     /* Advanced Settings Section */
     #advancedSettings {
       display: none;
@@ -397,19 +406,22 @@
     </div>
   </div>
 
-  <div class="form-group">
-    <label for="authMethod">Authentication Method:</label>
-    <select id="authMethod">
-      <option value="manual" selected>Manual Token</option>
-      <option value="google">Google Sign-In</option>
-    </select>
-  </div>
-  <div class="form-group" id="manualTokenGroup">
-    <label for="token">GitHub Token (optional):</label>
-    <input type="password" id="token" placeholder="GitHub Token">
-    <button id="clearTokenBtn" type="button">Clear Token</button>
-  </div>
-  <button id="googleSignInBtn" style="display:none;">Sign in with Google</button>
+  <details id="authDetails">
+    <summary>Authentication</summary>
+    <div class="form-group">
+      <label for="authMethod">Authentication Method:</label>
+      <select id="authMethod">
+        <option value="manual" selected>Manual Token</option>
+        <option value="google">Google Sign-In</option>
+      </select>
+    </div>
+    <div class="form-group" id="manualTokenGroup">
+      <label for="token">GitHub Token (optional):</label>
+      <input type="password" id="token" placeholder="GitHub Token">
+      <button id="clearTokenBtn" type="button">Clear Token</button>
+    </div>
+    <button id="googleSignInBtn" style="display:none;">Sign in with Google</button>
+  </details>
   <div class="form-group">
     <label for="commit">Commit SHA or Branch (optional):</label>
     <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
