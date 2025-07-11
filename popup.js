@@ -1,5 +1,64 @@
 // popup.js
 
+// Minimal pLimit implementation (adapted for browser usage)
+function pLimit(concurrency) {
+  if (!(Number.isInteger(concurrency) && concurrency > 0)) {
+    throw new TypeError('Expected `concurrency` to be a number from 1 and up');
+  }
+  const queue = [];
+  let activeCount = 0;
+
+  const next = () => {
+    activeCount--;
+    if (queue.length > 0) {
+      const fn = queue.shift();
+      fn();
+    }
+  };
+
+  const run = async (fn, resolve, args) => {
+    activeCount++;
+    const result = Promise.resolve().then(() => fn(...args));
+    resolve(result);
+    try {
+      await result;
+    } finally {
+      next();
+    }
+  };
+
+  const enqueue = (fn, resolve, args) => {
+    queue.push(run.bind(undefined, fn, resolve, args));
+    (async () => {
+      await Promise.resolve();
+      if (activeCount < concurrency && queue.length > 0) {
+        const fn = queue.shift();
+        fn();
+      }
+    })();
+  };
+
+  const generator = (fn, ...args) => new Promise(resolve => {
+    enqueue(fn, resolve, args);
+  });
+
+  Object.defineProperties(generator, {
+    activeCount: {
+      get: () => activeCount,
+    },
+    pendingCount: {
+      get: () => queue.length,
+    },
+    clearQueue: {
+      value: () => {
+        queue.length = 0;
+      },
+    },
+  });
+
+  return generator;
+}
+
 /**
  * Escape special characters for use in a regular expression.
  * @param {string} string - The string to escape.
@@ -948,7 +1007,8 @@ function fetchFilesContent(files, maxChars, owner, repo, ref) {
 
   const skippedFiles = [];
   const MAX_FILE_SIZE = 500000; // 500 KB
-  const fetches = files.map(file => {
+  const limit = pLimit(5);
+  const fetches = files.map(file => limit(() => {
     return fetchWithToken(file.url)
       .then(response => {
         if (!response.ok) {
@@ -1000,7 +1060,7 @@ function fetchFilesContent(files, maxChars, owner, repo, ref) {
         skippedFiles.push(file.path);
         return null;
       });
-  });
+  }));
   return Promise.all(fetches).then(results => ({
     filesContent: results.filter(item => item !== null),
     skippedFiles

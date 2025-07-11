@@ -113,8 +113,12 @@
 - If any files are skipped, their names are listed in the popup after summarization.
 
 - **Autoscroll Behavior**:
-  
+
   - The autoscroll feature relies on the popup's scroll behavior and may vary based on the number of files and summary length.
+
+- **Concurrent Fetch Limit**:
+
+  - The extension fetches file contents in batches of five to avoid overwhelming the GitHub API.
 
 ## Troubleshooting
 
