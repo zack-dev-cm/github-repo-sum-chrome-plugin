@@ -626,6 +626,7 @@ async function processRepo() {
   const copySummaryBtn = document.getElementById('copySummaryBtn');
   const fileSizeEl = document.getElementById('fileSize');
   const tokenCountEl = document.getElementById('tokenCount');
+  const skippedFilesEl = document.getElementById('skippedFiles');
 
   // Reset UI elements
   statusEl.style.display = 'none';
@@ -637,6 +638,8 @@ async function processRepo() {
   copySummaryBtn.style.display = 'none';
   fileSizeEl.style.display = 'none';
   tokenCountEl.style.display = 'none';
+  skippedFilesEl.style.display = 'none';
+  skippedFilesEl.textContent = '';
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -705,7 +708,7 @@ async function processRepo() {
           }
         }
 
-        const contents = await fetchFilesContent(codeFiles, maxChars);
+        const { filesContent: contents, skippedFiles } = await fetchFilesContent(codeFiles, maxChars);
 
         let finalContent = '';
         let combinedContent = '';
@@ -739,6 +742,18 @@ async function processRepo() {
         const estimatedTokens = estimateTokenCount(finalContent);
         tokenCountEl.textContent = `Estimated Token Count: ${estimatedTokens}`;
         tokenCountEl.style.display = 'block';
+
+        if (skippedFiles && skippedFiles.length > 0) {
+          const displayList = skippedFiles.slice(0, 5).join(', ');
+          let message = `Skipped ${skippedFiles.length} file(s) due to size or fetch errors.`;
+          if (skippedFiles.length <= 5) {
+            message += ` (${displayList})`;
+          } else {
+            message += ` (${displayList}, ...)`;
+          }
+          skippedFilesEl.textContent = message;
+          skippedFilesEl.style.display = 'block';
+        }
 
         // Show summary preview (first 100 chars and last 100 chars)
         let previewLength = 100;
@@ -916,15 +931,17 @@ function identifyLargeFiles(files) {
  */
 function fetchFilesContent(files, maxChars) {
   if (!files || !Array.isArray(files) || files.length === 0) {
-    return Promise.resolve([]);
+    return Promise.resolve({ filesContent: [], skippedFiles: [] });
   }
 
+  const skippedFiles = [];
   const MAX_FILE_SIZE = 500000; // 500 KB
   const fetches = files.map(file => {
     return fetchWithToken(file.url)
       .then(response => {
         if (!response.ok) {
           console.warn(`Failed to fetch ${file.path}: ${response.status} ${response.statusText}`);
+          skippedFiles.push(file.path);
           return null;
         }
         return response.json();
@@ -932,7 +949,6 @@ function fetchFilesContent(files, maxChars) {
       .then(blobData => {
         if (blobData && blobData.size <= MAX_FILE_SIZE && blobData.content) {
           let content = atob(blobData.content.replace(/\n/g, ''));
-          // Truncate content if maxChars is set
           if (maxChars > 0 && content.length > maxChars * 2) {
             const startContent = content.substring(0, maxChars);
             const endContent = content.substring(content.length - maxChars);
@@ -941,17 +957,21 @@ function fetchFilesContent(files, maxChars) {
           return { path: file.path, content };
         } else {
           console.warn(`Skipped ${file.path}: File is too large or couldn't be fetched.`);
+          skippedFiles.push(file.path);
           return null;
         }
       })
       .catch(error => {
         console.warn(`Error fetching ${file.path}: ${error.message}`);
+        skippedFiles.push(file.path);
         return null;
       });
   });
-  return Promise.all(fetches).then(results => results.filter(item => item !== null));
+  return Promise.all(fetches).then(results => ({
+    filesContent: results.filter(item => item !== null),
+    skippedFiles
+  }));
 }
-
 /**
  * Build combined content from all files.
  * @param {Array} filesContent - Array of file contents.
