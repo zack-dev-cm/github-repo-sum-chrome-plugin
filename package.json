@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/e2e/basic.test.js"
+    "test": "node tests/fallback.test.js && node tests/e2e/basic.test.js"
   },
   "devDependencies": {
     "puppeteer": "^21.6.0"
