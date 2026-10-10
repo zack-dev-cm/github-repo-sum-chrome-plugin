@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node tests/fallback.test.js && node tests/e2e/basic.test.js"
+    "test": "npm run test:locales && npm run test:fallback && node tests/e2e/basic.test.js",
+    "test:locales": "node --test tests/i18n.test.js",
+    "test:fallback": "node tests/fallback.test.js",
+    "preview:locales": "node tests/fixtures/serve-popup.js"
   },
   "devDependencies": {
+    "jsdom": "^26.1.0",
     "puppeteer": "^21.6.0"
   },
   "dependencies": {

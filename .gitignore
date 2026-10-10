@@ -61,9 +61,6 @@ coverage/
 # Yarn lock file (if not using Yarn)
 yarn.lock
 
-# NPM package lock file (if not using NPM)
-package-lock.json
-
 # Other compressed archives
 *.zip
 *.tar.gz

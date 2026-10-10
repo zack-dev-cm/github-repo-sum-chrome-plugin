@@ -1,4 +1,290 @@
 {
-  "extensionName": {"message": "מסכם מאגרי GitHub"},
-  "extensionDescription": {"message": "יצירת תקצירי קוד והורדת מאגרי GitHub."}
+  "extensionDescription": {
+    "message": "יצירת תקצירי קוד והורדת מאגרי GitHub."
+  },
+  "extensionName": {
+    "message": "מסכם מאגרי GitHub"
+  },
+  "fileExtensions": {
+    "message": "סיומות קבצים להכללה:"
+  },
+  "saveSettings": {
+    "message": "שמירת ההגדרות למאגר הזה"
+  },
+  "advancedSettings": {
+    "message": "הגדרות מתקדמות"
+  },
+  "hideAdvancedSettings": {
+    "message": "הסתרת הגדרות מתקדמות"
+  },
+  "preScanRepo": {
+    "message": "סריקה מקדימה של המאגר"
+  },
+  "availableExtensions": {
+    "message": "סיומות זמינות במאגר:"
+  },
+  "maxChars": {
+    "message": "מספר תווים מרבי לקובץ (0 ללא הגבלה):"
+  },
+  "maxCharsPlaceholder": {
+    "message": "למשל, 1000"
+  },
+  "selectDirectories": {
+    "message": "בחירת תיקיות להכללה:"
+  },
+  "searchDirectories": {
+    "message": "חיפוש תיקיות..."
+  },
+  "selectAll": {
+    "message": "בחירת הכול"
+  },
+  "clear": {
+    "message": "ניקוי"
+  },
+  "clearSelections": {
+    "message": "ניקוי כל הבחירות"
+  },
+  "authentication": {
+    "message": "אימות"
+  },
+  "authenticationMethod": {
+    "message": "שיטת אימות:"
+  },
+  "manualToken": {
+    "message": "אסימון ידני"
+  },
+  "googleSignIn": {
+    "message": "כניסה באמצעות Google"
+  },
+  "githubToken": {
+    "message": "אסימון GitHub (לא חובה):"
+  },
+  "githubTokenPlaceholder": {
+    "message": "אסימון GitHub"
+  },
+  "clearToken": {
+    "message": "ניקוי האסימון"
+  },
+  "signInGoogle": {
+    "message": "כניסה עם Google"
+  },
+  "commitRef": {
+    "message": "מזהה SHA של קומיט או ענף (לא חובה):"
+  },
+  "commitPlaceholder": {
+    "message": "למשל, main או a1b2c3d"
+  },
+  "includeInSummary": {
+    "message": "להכללה בסיכום:"
+  },
+  "includeContent": {
+    "message": "שמות הקבצים והתוכן שלהם"
+  },
+  "includeTree": {
+    "message": "מבנה עץ התיקיות"
+  },
+  "summarizeRepo": {
+    "message": "סיכום המאגר"
+  },
+  "loading": {
+    "message": "בטעינה"
+  },
+  "processing": {
+    "message": "בעיבוד..."
+  },
+  "downloadCombinedFile": {
+    "message": "הורדת הקובץ המאוחד"
+  },
+  "copySummary": {
+    "message": "העתקת הסיכום ללוח"
+  },
+  "starPrompt": {
+    "message": "אם התוסף שימושי לך, אפשר לסמן את הפרויקט בכוכב ב־GitHub."
+  },
+  "starGitHub": {
+    "message": "סימון בכוכב ב־GitHub"
+  },
+  "dismiss": {
+    "message": "סגירה"
+  },
+  "feedbackHeading": {
+    "message": "המשוב שלך חשוב לנו!"
+  },
+  "starStore": {
+    "message": "דירוג בחנות האינטרנט של Chrome"
+  },
+  "feedbackPlaceholder": {
+    "message": "אילו תכונות חסרות לך ומה כדאי לשפר..."
+  },
+  "submitFeedback": {
+    "message": "שליחת משוב"
+  },
+  "repoStarred": {
+    "message": "המאגר סומן בכוכב! תודה."
+  },
+  "repoSizeMessage": {
+    "message": "גודל המאגר: $SIZE$ MB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "repoInfoError": {
+    "message": "לא ניתן לקבל את פרטי המאגר."
+  },
+  "repoSizeError": {
+    "message": "שגיאה בקבלת גודל המאגר."
+  },
+  "scanning": {
+    "message": "בסריקה..."
+  },
+  "selectedCount": {
+    "message": "נבחרו: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "rootDirectory": {
+    "message": "תיקיית השורש (/)"
+  },
+  "noDirectories": {
+    "message": "לא נמצאו תיקיות. כל הקבצים עם הסיומות שנבחרו ייכללו."
+  },
+  "extensionsError": {
+    "message": "שגיאה בקבלת הסיומות."
+  },
+  "directoriesError": {
+    "message": "שגיאה בקבלת התיקיות."
+  },
+  "commitsError": {
+    "message": "לא ניתן לקבל את הקומיטים"
+  },
+  "loadingCommits": {
+    "message": "טעינת קומיטים..."
+  },
+  "noRepoDetected": {
+    "message": "לא זוהה מאגר"
+  },
+  "latestCommit": {
+    "message": "האחרון"
+  },
+  "loadingCommitsError": {
+    "message": "שגיאה בטעינת הקומיטים"
+  },
+  "selectDirectoryError": {
+    "message": "יש לבחור לפחות תיקייה אחת להכללה בסיכום."
+  },
+  "selectExtensionError": {
+    "message": "יש לציין לפחות סיומת קובץ אחת."
+  },
+  "largeFilesConfirm": {
+    "message": "יש $COUNT$ קבצים גדולים. להמשיך עם הקבצים האלה?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noContentSelected": {
+    "message": "לא נבחר תוכן להכללה בסיכום."
+  },
+  "fileReady": {
+    "message": "הקובץ מוכן להורדה."
+  },
+  "fileSizeMessage": {
+    "message": "גודל הקובץ: $SIZE$ KB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "tokenCountMessage": {
+    "message": "מספר טוקנים משוער: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidRepoPage": {
+    "message": "זה אינו דף מאגר תקין ב־GitHub."
+  },
+  "rateLimitError": {
+    "message": "חריגה ממגבלת הבקשות ל־GitHub API. יש להזין אסימון GitHub תקין. ניתן לקבל אותו בכתובת https://github.com/settings/tokens"
+  },
+  "apiError": {
+    "message": "שגיאת GitHub API: $STATUS$ $DETAIL$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "invalidTokenError": {
+    "message": "אסימון GitHub שהוזן אינו תקין."
+  },
+  "treeTooLargeError": {
+    "message": "עץ המאגר גדול מדי לקבלה."
+  },
+  "treeFormatError": {
+    "message": "התקבל פורמט נתונים לא צפוי מ־GitHub API."
+  },
+  "repoNotFoundError": {
+    "message": "המאגר לא נמצא או שהוא פרטי."
+  },
+  "noFilesError": {
+    "message": "לא נמצאו קבצים במאגר."
+  },
+  "noFileContentsError": {
+    "message": "אין תוכן קבצים זמין."
+  },
+  "downloadNamedSummary": {
+    "message": "הורדת סיכום הקוד של $REPO$",
+    "placeholders": {
+      "repo": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSummaryToCopy": {
+    "message": "אין סיכום זמין להעתקה."
+  },
+  "summaryCopied": {
+    "message": "הסיכום הועתק ללוח."
+  },
+  "copyFailed": {
+    "message": "העתקת הסיכום ללוח נכשלה."
+  },
+  "feedbackEmpty": {
+    "message": "יש להזין משוב לפני השליחה."
+  },
+  "feedbackEmailError": {
+    "message": "שליחת המשוב נכשלה: כתובת הדוא״ל המוגדרת אינה תקינה."
+  },
+  "feedbackThanks": {
+    "message": "תודה על המשוב!"
+  },
+  "versionMessage": {
+    "message": "גרסה: $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "oauthError": {
+    "message": "אימות OAuth נכשל: $DETAIL$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  }
 }

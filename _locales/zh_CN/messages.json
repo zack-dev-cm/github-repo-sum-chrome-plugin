@@ -1,4 +1,290 @@
 {
-  "extensionName": {"message": "GitHub 仓库摘要工具"},
-  "extensionDescription": {"message": "生成代码摘要并下载GitHub仓库."}
+  "extensionDescription": {
+    "message": "生成代码摘要并下载GitHub仓库."
+  },
+  "extensionName": {
+    "message": "GitHub 仓库摘要工具"
+  },
+  "fileExtensions": {
+    "message": "要包含的文件扩展名："
+  },
+  "saveSettings": {
+    "message": "保存此仓库的设置"
+  },
+  "advancedSettings": {
+    "message": "高级设置"
+  },
+  "hideAdvancedSettings": {
+    "message": "隐藏高级设置"
+  },
+  "preScanRepo": {
+    "message": "预扫描仓库"
+  },
+  "availableExtensions": {
+    "message": "仓库中的可用扩展名："
+  },
+  "maxChars": {
+    "message": "每个文件的最大字符数（0 表示不限制）："
+  },
+  "maxCharsPlaceholder": {
+    "message": "例如：1000"
+  },
+  "selectDirectories": {
+    "message": "选择要包含的目录："
+  },
+  "searchDirectories": {
+    "message": "搜索目录…"
+  },
+  "selectAll": {
+    "message": "全选"
+  },
+  "clear": {
+    "message": "清除"
+  },
+  "clearSelections": {
+    "message": "清除所有选择"
+  },
+  "authentication": {
+    "message": "身份验证"
+  },
+  "authenticationMethod": {
+    "message": "身份验证方式："
+  },
+  "manualToken": {
+    "message": "手动输入令牌"
+  },
+  "googleSignIn": {
+    "message": "Google 登录"
+  },
+  "githubToken": {
+    "message": "GitHub 令牌（可选）："
+  },
+  "githubTokenPlaceholder": {
+    "message": "GitHub 令牌"
+  },
+  "clearToken": {
+    "message": "清除令牌"
+  },
+  "signInGoogle": {
+    "message": "使用 Google 登录"
+  },
+  "commitRef": {
+    "message": "提交 SHA 或分支（可选）："
+  },
+  "commitPlaceholder": {
+    "message": "例如：main 或 a1b2c3d"
+  },
+  "includeInSummary": {
+    "message": "摘要包含："
+  },
+  "includeContent": {
+    "message": "文件名和内容"
+  },
+  "includeTree": {
+    "message": "目录树结构"
+  },
+  "summarizeRepo": {
+    "message": "生成仓库摘要"
+  },
+  "loading": {
+    "message": "正在加载"
+  },
+  "processing": {
+    "message": "正在处理…"
+  },
+  "downloadCombinedFile": {
+    "message": "下载合并文件"
+  },
+  "copySummary": {
+    "message": "将摘要复制到剪贴板"
+  },
+  "starPrompt": {
+    "message": "如果你喜欢此扩展，欢迎在 GitHub 上为项目加星。"
+  },
+  "starGitHub": {
+    "message": "在 GitHub 上加星"
+  },
+  "dismiss": {
+    "message": "关闭"
+  },
+  "feedbackHeading": {
+    "message": "我们重视你的反馈！"
+  },
+  "starStore": {
+    "message": "在 Chrome 应用商店评分"
+  },
+  "feedbackPlaceholder": {
+    "message": "告诉我们你希望添加的功能或需要改进的地方…"
+  },
+  "submitFeedback": {
+    "message": "提交反馈"
+  },
+  "repoStarred": {
+    "message": "已为仓库加星！谢谢。"
+  },
+  "repoSizeMessage": {
+    "message": "仓库大小：$SIZE$ MB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "repoInfoError": {
+    "message": "无法获取仓库信息。"
+  },
+  "repoSizeError": {
+    "message": "获取仓库大小时出错。"
+  },
+  "scanning": {
+    "message": "正在扫描…"
+  },
+  "selectedCount": {
+    "message": "已选择：$COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "rootDirectory": {
+    "message": "根目录（/）"
+  },
+  "noDirectories": {
+    "message": "未找到目录。将包含所有具有指定扩展名的文件。"
+  },
+  "extensionsError": {
+    "message": "获取扩展名时出错。"
+  },
+  "directoriesError": {
+    "message": "获取目录时出错。"
+  },
+  "commitsError": {
+    "message": "无法获取提交记录"
+  },
+  "loadingCommits": {
+    "message": "正在加载提交记录…"
+  },
+  "noRepoDetected": {
+    "message": "未检测到仓库"
+  },
+  "latestCommit": {
+    "message": "最新"
+  },
+  "loadingCommitsError": {
+    "message": "加载提交记录时出错"
+  },
+  "selectDirectoryError": {
+    "message": "请选择至少一个要包含在摘要中的目录。"
+  },
+  "selectExtensionError": {
+    "message": "请指定至少一个文件扩展名。"
+  },
+  "largeFilesConfirm": {
+    "message": "有 $COUNT$ 个大文件。是否继续并包含这些文件？",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noContentSelected": {
+    "message": "未选择要包含在摘要中的内容。"
+  },
+  "fileReady": {
+    "message": "文件已准备好，可以下载。"
+  },
+  "fileSizeMessage": {
+    "message": "文件大小：$SIZE$ KB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "tokenCountMessage": {
+    "message": "估计令牌数：$COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidRepoPage": {
+    "message": "当前页面不是有效的 GitHub 仓库页面。"
+  },
+  "rateLimitError": {
+    "message": "已超出 GitHub API 速率限制。请输入有效的 GitHub 令牌，可在 https://github.com/settings/tokens 获取。"
+  },
+  "apiError": {
+    "message": "GitHub API 错误：$STATUS$ $DETAIL$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "invalidTokenError": {
+    "message": "提供的 GitHub 令牌无效。"
+  },
+  "treeTooLargeError": {
+    "message": "仓库目录树过大，无法获取。"
+  },
+  "treeFormatError": {
+    "message": "从 GitHub API 收到了意外的数据格式。"
+  },
+  "repoNotFoundError": {
+    "message": "仓库不存在或为私有仓库。"
+  },
+  "noFilesError": {
+    "message": "仓库中未找到文件。"
+  },
+  "noFileContentsError": {
+    "message": "没有可用的文件内容。"
+  },
+  "downloadNamedSummary": {
+    "message": "下载 $REPO$ 代码摘要",
+    "placeholders": {
+      "repo": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSummaryToCopy": {
+    "message": "没有可复制的摘要。"
+  },
+  "summaryCopied": {
+    "message": "摘要已复制到剪贴板。"
+  },
+  "copyFailed": {
+    "message": "无法将摘要复制到剪贴板。"
+  },
+  "feedbackEmpty": {
+    "message": "请先输入反馈再提交。"
+  },
+  "feedbackEmailError": {
+    "message": "反馈提交失败：配置的电子邮件地址无效。"
+  },
+  "feedbackThanks": {
+    "message": "感谢你的反馈！"
+  },
+  "versionMessage": {
+    "message": "版本：$VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "oauthError": {
+    "message": "OAuth 失败：$DETAIL$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  }
 }

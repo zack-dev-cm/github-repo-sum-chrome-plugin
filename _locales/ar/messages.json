@@ -1,4 +1,290 @@
 {
-  "extensionName": {"message": "ملخص مستودعات GitHub"},
-  "extensionDescription": {"message": "إنشاء ملخصات للشفرة وتنزيل مستودعات GitHub."}
+  "extensionDescription": {
+    "message": "إنشاء ملخصات للشفرة وتنزيل مستودعات GitHub."
+  },
+  "extensionName": {
+    "message": "ملخص مستودعات GitHub"
+  },
+  "fileExtensions": {
+    "message": "امتدادات الملفات المطلوب تضمينها:"
+  },
+  "saveSettings": {
+    "message": "حفظ الإعدادات لهذا المستودع"
+  },
+  "advancedSettings": {
+    "message": "الإعدادات المتقدمة"
+  },
+  "hideAdvancedSettings": {
+    "message": "إخفاء الإعدادات المتقدمة"
+  },
+  "preScanRepo": {
+    "message": "فحص المستودع مسبقًا"
+  },
+  "availableExtensions": {
+    "message": "الامتدادات المتاحة في المستودع:"
+  },
+  "maxChars": {
+    "message": "الحد الأقصى للأحرف لكل ملف (0 دون حد):"
+  },
+  "maxCharsPlaceholder": {
+    "message": "مثال: 1000"
+  },
+  "selectDirectories": {
+    "message": "اختيار المجلدات المطلوب تضمينها:"
+  },
+  "searchDirectories": {
+    "message": "البحث في المجلدات..."
+  },
+  "selectAll": {
+    "message": "تحديد الكل"
+  },
+  "clear": {
+    "message": "مسح"
+  },
+  "clearSelections": {
+    "message": "مسح جميع التحديدات"
+  },
+  "authentication": {
+    "message": "المصادقة"
+  },
+  "authenticationMethod": {
+    "message": "طريقة المصادقة:"
+  },
+  "manualToken": {
+    "message": "رمز وصول يدوي"
+  },
+  "googleSignIn": {
+    "message": "تسجيل الدخول عبر Google"
+  },
+  "githubToken": {
+    "message": "رمز وصول GitHub (اختياري):"
+  },
+  "githubTokenPlaceholder": {
+    "message": "رمز وصول GitHub"
+  },
+  "clearToken": {
+    "message": "مسح رمز الوصول"
+  },
+  "signInGoogle": {
+    "message": "تسجيل الدخول باستخدام Google"
+  },
+  "commitRef": {
+    "message": "معرّف الالتزام SHA أو الفرع (اختياري):"
+  },
+  "commitPlaceholder": {
+    "message": "مثال: main أو a1b2c3d"
+  },
+  "includeInSummary": {
+    "message": "تضمين في الملخص:"
+  },
+  "includeContent": {
+    "message": "أسماء الملفات ومحتواها"
+  },
+  "includeTree": {
+    "message": "بنية شجرة المجلدات"
+  },
+  "summarizeRepo": {
+    "message": "تلخيص المستودع"
+  },
+  "loading": {
+    "message": "جارٍ التحميل"
+  },
+  "processing": {
+    "message": "جارٍ المعالجة..."
+  },
+  "downloadCombinedFile": {
+    "message": "تنزيل الملف المدمج"
+  },
+  "copySummary": {
+    "message": "نسخ الملخص إلى الحافظة"
+  },
+  "starPrompt": {
+    "message": "إذا أعجبتك هذه الإضافة، يمكنك إضافة نجمة للمشروع على GitHub."
+  },
+  "starGitHub": {
+    "message": "إضافة نجمة على GitHub"
+  },
+  "dismiss": {
+    "message": "إغلاق"
+  },
+  "feedbackHeading": {
+    "message": "نقدّر ملاحظاتك!"
+  },
+  "starStore": {
+    "message": "تقييم الإضافة في متجر Chrome"
+  },
+  "feedbackPlaceholder": {
+    "message": "أخبرنا بالميزات التي تريدها أو بما لا يعجبك..."
+  },
+  "submitFeedback": {
+    "message": "إرسال الملاحظات"
+  },
+  "repoStarred": {
+    "message": "تمت إضافة نجمة للمستودع! شكرًا لك."
+  },
+  "repoSizeMessage": {
+    "message": "حجم المستودع: $SIZE$ MB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "repoInfoError": {
+    "message": "تعذّر جلب معلومات المستودع."
+  },
+  "repoSizeError": {
+    "message": "حدث خطأ أثناء جلب حجم المستودع."
+  },
+  "scanning": {
+    "message": "جارٍ الفحص..."
+  },
+  "selectedCount": {
+    "message": "المحدد: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "rootDirectory": {
+    "message": "المجلد الجذر (/)"
+  },
+  "noDirectories": {
+    "message": "لم يتم العثور على مجلدات. ستُضمّن جميع الملفات ذات الامتدادات المحددة."
+  },
+  "extensionsError": {
+    "message": "حدث خطأ أثناء جلب الامتدادات."
+  },
+  "directoriesError": {
+    "message": "حدث خطأ أثناء جلب المجلدات."
+  },
+  "commitsError": {
+    "message": "تعذّر جلب الالتزامات"
+  },
+  "loadingCommits": {
+    "message": "جارٍ تحميل الالتزامات..."
+  },
+  "noRepoDetected": {
+    "message": "لم يتم اكتشاف مستودع"
+  },
+  "latestCommit": {
+    "message": "الأحدث"
+  },
+  "loadingCommitsError": {
+    "message": "حدث خطأ أثناء تحميل الالتزامات"
+  },
+  "selectDirectoryError": {
+    "message": "يرجى تحديد مجلد واحد على الأقل لتضمينه في الملخص."
+  },
+  "selectExtensionError": {
+    "message": "يرجى تحديد امتداد ملف واحد على الأقل."
+  },
+  "largeFilesConfirm": {
+    "message": "يوجد $COUNT$ من الملفات الكبيرة. هل تريد المتابعة مع تضمين هذه الملفات؟",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noContentSelected": {
+    "message": "لم يتم اختيار محتوى لتضمينه في الملخص."
+  },
+  "fileReady": {
+    "message": "الملف جاهز للتنزيل."
+  },
+  "fileSizeMessage": {
+    "message": "حجم الملف: $SIZE$ KB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "tokenCountMessage": {
+    "message": "العدد التقريبي لوحدات النص: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidRepoPage": {
+    "message": "هذه ليست صفحة مستودع GitHub صالحة."
+  },
+  "rateLimitError": {
+    "message": "تم تجاوز حد طلبات GitHub API. يرجى إدخال رمز وصول GitHub صالح. احصل عليه من https://github.com/settings/tokens"
+  },
+  "apiError": {
+    "message": "خطأ في GitHub API: $STATUS$ $DETAIL$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "invalidTokenError": {
+    "message": "رمز وصول GitHub المُدخل غير صالح."
+  },
+  "treeTooLargeError": {
+    "message": "شجرة المستودع كبيرة جدًا ولا يمكن جلبها."
+  },
+  "treeFormatError": {
+    "message": "تم استلام تنسيق بيانات غير متوقع من GitHub API."
+  },
+  "repoNotFoundError": {
+    "message": "المستودع غير موجود أو خاص."
+  },
+  "noFilesError": {
+    "message": "لم يتم العثور على ملفات في المستودع."
+  },
+  "noFileContentsError": {
+    "message": "لا يتوفر محتوى ملفات."
+  },
+  "downloadNamedSummary": {
+    "message": "تنزيل ملخص شيفرة $REPO$",
+    "placeholders": {
+      "repo": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSummaryToCopy": {
+    "message": "لا يتوفر ملخص لنسخه."
+  },
+  "summaryCopied": {
+    "message": "تم نسخ الملخص إلى الحافظة."
+  },
+  "copyFailed": {
+    "message": "تعذّر نسخ الملخص إلى الحافظة."
+  },
+  "feedbackEmpty": {
+    "message": "يرجى إدخال ملاحظاتك قبل الإرسال."
+  },
+  "feedbackEmailError": {
+    "message": "تعذّر إرسال الملاحظات: عنوان البريد الإلكتروني المُعدّ غير صالح."
+  },
+  "feedbackThanks": {
+    "message": "شكرًا على ملاحظاتك!"
+  },
+  "versionMessage": {
+    "message": "الإصدار: $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "oauthError": {
+    "message": "فشلت مصادقة OAuth: $DETAIL$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  }
 }
