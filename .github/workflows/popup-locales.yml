@@ -1,0 +1,22 @@
+name: Popup locale fixtures
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  locale-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:locales
+      - run: npm run test:fallback
+      - run: node --input-type=commonjs --check < popup.js
+      - run: node --input-type=commonjs --check < popup-i18n.js
+      - run: git diff --check

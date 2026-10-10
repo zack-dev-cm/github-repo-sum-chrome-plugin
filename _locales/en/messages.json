@@ -1,4 +1,290 @@
 {
-  "extensionName": {"message": "GitHub Repo Summarizer"},
-  "extensionDescription": {"message": "Generate code summaries and download GitHub repositories."}
+  "extensionDescription": {
+    "message": "Generate code summaries and download GitHub repositories."
+  },
+  "extensionName": {
+    "message": "GitHub Repo Summarizer"
+  },
+  "fileExtensions": {
+    "message": "File Extensions to Include:"
+  },
+  "saveSettings": {
+    "message": "Save settings for this repository"
+  },
+  "advancedSettings": {
+    "message": "Advanced Settings"
+  },
+  "hideAdvancedSettings": {
+    "message": "Hide Advanced Settings"
+  },
+  "preScanRepo": {
+    "message": "Pre-scan Repository"
+  },
+  "availableExtensions": {
+    "message": "Available Extensions in Repository:"
+  },
+  "maxChars": {
+    "message": "Max Characters per File (0 for no limit):"
+  },
+  "maxCharsPlaceholder": {
+    "message": "e.g., 1000"
+  },
+  "selectDirectories": {
+    "message": "Select Directories to Include:"
+  },
+  "searchDirectories": {
+    "message": "Search directories..."
+  },
+  "selectAll": {
+    "message": "Select All"
+  },
+  "clear": {
+    "message": "Clear"
+  },
+  "clearSelections": {
+    "message": "Clear All Selections"
+  },
+  "authentication": {
+    "message": "Authentication"
+  },
+  "authenticationMethod": {
+    "message": "Authentication Method:"
+  },
+  "manualToken": {
+    "message": "Manual Token"
+  },
+  "googleSignIn": {
+    "message": "Google Sign-In"
+  },
+  "githubToken": {
+    "message": "GitHub Token (optional):"
+  },
+  "githubTokenPlaceholder": {
+    "message": "GitHub Token"
+  },
+  "clearToken": {
+    "message": "Clear Token"
+  },
+  "signInGoogle": {
+    "message": "Sign in with Google"
+  },
+  "commitRef": {
+    "message": "Commit SHA or Branch (optional):"
+  },
+  "commitPlaceholder": {
+    "message": "e.g., main or a1b2c3d"
+  },
+  "includeInSummary": {
+    "message": "Include in Summary:"
+  },
+  "includeContent": {
+    "message": "File Names and Content"
+  },
+  "includeTree": {
+    "message": "Directory Tree Structure"
+  },
+  "summarizeRepo": {
+    "message": "Summarize Repository"
+  },
+  "loading": {
+    "message": "Loading"
+  },
+  "processing": {
+    "message": "Processing..."
+  },
+  "downloadCombinedFile": {
+    "message": "Download Combined File"
+  },
+  "copySummary": {
+    "message": "Copy Summary to Clipboard"
+  },
+  "starPrompt": {
+    "message": "If you enjoy this extension, please consider starring the project on GitHub."
+  },
+  "starGitHub": {
+    "message": "Star on GitHub"
+  },
+  "dismiss": {
+    "message": "Dismiss"
+  },
+  "feedbackHeading": {
+    "message": "We Value Your Feedback!"
+  },
+  "starStore": {
+    "message": "Star on Chrome Web Store"
+  },
+  "feedbackPlaceholder": {
+    "message": "Tell us what features you'd like to see or what you don't like..."
+  },
+  "submitFeedback": {
+    "message": "Submit Feedback"
+  },
+  "repoStarred": {
+    "message": "Repository starred! Thank you."
+  },
+  "repoSizeMessage": {
+    "message": "Repo Size: $SIZE$ MB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "repoInfoError": {
+    "message": "Unable to retrieve repository information."
+  },
+  "repoSizeError": {
+    "message": "Error fetching repository size."
+  },
+  "scanning": {
+    "message": "Scanning..."
+  },
+  "selectedCount": {
+    "message": "Selected: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "rootDirectory": {
+    "message": "Root Directory (/)"
+  },
+  "noDirectories": {
+    "message": "No directories found. All files with specified extensions will be included."
+  },
+  "extensionsError": {
+    "message": "Error fetching extensions."
+  },
+  "directoriesError": {
+    "message": "Error fetching directories."
+  },
+  "commitsError": {
+    "message": "Unable to fetch commits"
+  },
+  "loadingCommits": {
+    "message": "Loading commits..."
+  },
+  "noRepoDetected": {
+    "message": "No repo detected"
+  },
+  "latestCommit": {
+    "message": "Latest"
+  },
+  "loadingCommitsError": {
+    "message": "Error loading commits"
+  },
+  "selectDirectoryError": {
+    "message": "Please select at least one directory to include in the summary."
+  },
+  "selectExtensionError": {
+    "message": "Please specify at least one file extension."
+  },
+  "largeFilesConfirm": {
+    "message": "There are $COUNT$ large files. Do you want to proceed with these files included?",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "noContentSelected": {
+    "message": "No content selected to include in the summary."
+  },
+  "fileReady": {
+    "message": "File ready for download."
+  },
+  "fileSizeMessage": {
+    "message": "File Size: $SIZE$ KB",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "tokenCountMessage": {
+    "message": "Estimated Token Count: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "invalidRepoPage": {
+    "message": "Not on a valid GitHub repository page."
+  },
+  "rateLimitError": {
+    "message": "GitHub API rate limit exceeded. Please enter a valid GitHub token. Get one from https://github.com/settings/tokens"
+  },
+  "apiError": {
+    "message": "GitHub API error: $STATUS$ $DETAIL$",
+    "placeholders": {
+      "status": {
+        "content": "$1"
+      },
+      "detail": {
+        "content": "$2"
+      }
+    }
+  },
+  "invalidTokenError": {
+    "message": "Invalid GitHub token provided."
+  },
+  "treeTooLargeError": {
+    "message": "Repository tree is too large to fetch."
+  },
+  "treeFormatError": {
+    "message": "Unexpected data format received from GitHub API."
+  },
+  "repoNotFoundError": {
+    "message": "Repository not found or is private."
+  },
+  "noFilesError": {
+    "message": "No files found in the repository."
+  },
+  "noFileContentsError": {
+    "message": "No file contents available."
+  },
+  "downloadNamedSummary": {
+    "message": "Download $REPO$ Code Summary",
+    "placeholders": {
+      "repo": {
+        "content": "$1"
+      }
+    }
+  },
+  "noSummaryToCopy": {
+    "message": "No summary available to copy."
+  },
+  "summaryCopied": {
+    "message": "Summary copied to clipboard."
+  },
+  "copyFailed": {
+    "message": "Failed to copy summary to clipboard."
+  },
+  "feedbackEmpty": {
+    "message": "Please enter your feedback before submitting."
+  },
+  "feedbackEmailError": {
+    "message": "Feedback submission failed: Invalid email address configured."
+  },
+  "feedbackThanks": {
+    "message": "Thank you for your feedback!"
+  },
+  "versionMessage": {
+    "message": "Version: $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "oauthError": {
+    "message": "OAuth failed: $DETAIL$",
+    "placeholders": {
+      "detail": {
+        "content": "$1"
+      }
+    }
+  }
 }

@@ -169,6 +169,37 @@
 
 ### Running Tests
 
+The locale tests execute the actual popup scripts in jsdom with simulated Chrome APIs,
+GitHub responses, storage, and clipboard. They cover English, Arabic, Hebrew, and
+Simplified Chinese, including text-safe messages, control preservation, selection,
+summary generation, and error messages. Install without browser downloads to run
+these checks:
+
+```bash
+npm ci --ignore-scripts
+npm run test:locales
+npm run test:fallback
+```
+
+`npm run preview:locales` serves the actual popup source at
+`http://127.0.0.1:8774/?locale=ar`. Supported locale values are `en`, `ar`, `he`, and
+`zh_CN`; the visible scenario selector exercises simulated errors. The preview
+has an explicit fixture banner and does not contact GitHub or authenticate.
+It checks browser layout and interaction with mocks, not installed-extension
+acceptance, native Chrome i18n, extension CSP, or real clipboard permissions.
+
+Popup captions use `data-i18n` attributes and `popup-i18n.js`; changing status
+messages use named substitutions in `_locales/*/messages.json`. Labels inherit
+the Chrome UI locale and direction. Repository paths, code, tokens, and branch
+identifiers retain their original text and left-to-right presentation.
+
+Before a release, verify the installed extension in all four locales on a real
+repository: pre-scan, select directories and extensions, toggle advanced settings,
+choose a ref, summarize, inspect the downloaded text, copy, and recover from errors.
+Fixture CI alone does not pass this release gate. See
+[Chrome's i18n documentation](https://developer.chrome.com/docs/extensions/reference/api/i18n)
+for native message resolution and locale fallback behavior.
+
 End-to-end tests rely on [Puppeteer](https://pptr.dev/). Install dependencies and run the test suite with:
 
 ```bash

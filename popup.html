@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>GitHub Repo Summarizer</title>
+  <title data-i18n="extensionName">GitHub Repo Summarizer</title>
   <style>
     /* Reset and Base Styles */
     * {
@@ -82,7 +82,7 @@
       cursor: pointer;
     }
     .checkbox-group input[type="checkbox"] {
-      margin-right: 10px;
+      margin-inline-end: 10px;
       width: 16px;
       height: 16px;
     }
@@ -150,12 +150,12 @@
     #status {
       color: #155724;
       background-color: #d4edda;
-      border-left: 6px solid #28a745;
+      border-inline-start: 6px solid #28a745;
     }
     #error {
       color: #721c24;
       background-color: #f8d7da;
-      border-left: 6px solid #dc3545;
+      border-inline-start: 6px solid #dc3545;
     }
 
     /* Loading Indicator */
@@ -168,7 +168,7 @@
     .loading img {
       width: 24px;
       height: 24px;
-      margin-right: 10px;
+      margin-inline-end: 10px;
     }
     .loading span {
       font-size: 14px;
@@ -267,7 +267,7 @@
       cursor: pointer;
     }
     #directoriesContainer input[type="checkbox"] {
-      margin-right: 10px;
+      margin-inline-end: 10px;
       width: 16px;
       height: 16px;
     }
@@ -300,13 +300,15 @@
     /* New Styles for Directory Search and Select All */
     #directoryControls {
       display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 10px;
     }
     #directorySearch {
-      flex: 1;
-      margin-right: 10px;
+      flex: 1 1 110px;
+      min-width: 0;
       padding: 6px;
       font-size: 14px;
       border: 1px solid var(--md-sys-color-outline);
@@ -317,7 +319,7 @@
       align-items: center;
     }
     #selectAllContainer input[type="checkbox"] {
-      margin-right: 5px;
+      margin-inline-end: 5px;
       width: 16px;
       height: 16px;
     }
@@ -329,7 +331,9 @@
       padding: 6px 10px;
       font-size: 12px;
       cursor: pointer;
-      margin-left: 10px;
+      margin-inline-start: 10px;
+      margin-top: 0;
+      width: auto;
       transition: background-color 0.2s;
     }
     #clearSelectionBtn:hover {
@@ -339,7 +343,7 @@
       font-size: 12px;
       color: #555;
       margin-top: 5px;
-      text-align: right;
+      text-align: end;
     }
     /* Star Prompt Styles */
     #starPrompt {
@@ -362,13 +366,23 @@
     .highlight {
       animation: highlight-fade 2s ease-in-out;
     }
+    #extensions, #token, #commit, #directorySearch, #commitDropdown, #summaryPreview {
+      direction: ltr;
+      text-align: left;
+    }
+    #summaryPreview {
+      overflow-wrap: anywhere;
+    }
+    #availableExtensions bdi, #directoriesContainer bdi {
+      overflow-wrap: anywhere;
+    }
   </style>
 </head>
 <body>
-  <h2>GitHub Repo Summarizer</h2>
+  <h2 data-i18n="extensionName">GitHub Repo Summarizer</h2>
 
   <div class="form-group">
-    <label for="extensions">File Extensions to Include:</label>
+    <label for="extensions" data-i18n="fileExtensions">File Extensions to Include:</label>
     <input type="text" id="extensions" placeholder=".py, .js, .md" value=".js, .py, .java, .cpp, .md">
   </div>
   <div class="form-group">
@@ -378,30 +392,30 @@
   <div class="form-group">
     <!-- Set the 'checked' attribute to make it enabled by default -->
     <input type="checkbox" id="saveSettings" checked>
-    <label for="saveSettings">Save settings for this repository</label>
+    <label for="saveSettings" data-i18n="saveSettings">Save settings for this repository</label>
   </div>
 
-  <button id="advancedSettingsBtn">Advanced Settings</button>
+  <button id="advancedSettingsBtn" data-i18n="advancedSettings">Advanced Settings</button>
 
   <div id="advancedSettings">
-    <button id="preScanBtn">Pre-scan Repository</button>
+    <button id="preScanBtn" data-i18n="preScanRepo">Pre-scan Repository</button>
     <div class="form-group">
-      <label>Available Extensions in Repository:</label>
+      <label data-i18n="availableExtensions">Available Extensions in Repository:</label>
       <div id="availableExtensions">Scanning...</div>
     </div>
     <div class="form-group">
-      <label for="maxChars">Max Characters per File (0 for no limit):</label>
-      <input type="number" id="maxChars" min="0" placeholder="e.g., 1000" value="0">
+      <label for="maxChars" data-i18n="maxChars">Max Characters per File (0 for no limit):</label>
+      <input type="number" id="maxChars" min="0" data-i18n-placeholder="maxCharsPlaceholder" placeholder="e.g., 1000" value="0">
     </div>
     <!-- Directory Selection Section -->
     <div class="form-group">
-      <label for="directories">Select Directories to Include:</label>
+      <label data-i18n="selectDirectories">Select Directories to Include:</label>
       <div id="directoryControls">
-        <input type="text" id="directorySearch" placeholder="Search directories...">
+        <input type="text" id="directorySearch" data-i18n-placeholder="searchDirectories" placeholder="Search directories...">
         <div id="selectAllContainer">
           <input type="checkbox" id="selectAllDirectories" checked>
-          <label for="selectAllDirectories" style="margin:0;">Select All</label>
-          <button id="clearSelectionBtn" title="Clear All Selections">Clear</button>
+          <label for="selectAllDirectories" data-i18n="selectAll" style="margin:0;">Select All</label>
+          <button id="clearSelectionBtn" data-i18n="clear" data-i18n-title="clearSelections" title="Clear All Selections">Clear</button>
         </div>
       </div>
       <div id="directoriesContainer">Scanning...</div>
@@ -410,54 +424,54 @@
   </div>
 
   <details id="authDetails">
-    <summary>Authentication</summary>
+    <summary data-i18n="authentication">Authentication</summary>
     <div class="form-group">
-      <label for="authMethod">Authentication Method:</label>
+      <label for="authMethod" data-i18n="authenticationMethod">Authentication Method:</label>
       <select id="authMethod">
-        <option value="manual" selected>Manual Token</option>
-        <option value="google">Google Sign-In</option>
+        <option value="manual" data-i18n="manualToken" selected>Manual Token</option>
+        <option value="google" data-i18n="googleSignIn">Google Sign-In</option>
       </select>
     </div>
     <div class="form-group" id="manualTokenGroup">
-      <label for="token">GitHub Token (optional):</label>
-      <input type="password" id="token" placeholder="GitHub Token">
-      <button id="clearTokenBtn" type="button">Clear Token</button>
+      <label for="token" data-i18n="githubToken">GitHub Token (optional):</label>
+      <input type="password" id="token" data-i18n-placeholder="githubTokenPlaceholder" placeholder="GitHub Token">
+      <button id="clearTokenBtn" data-i18n="clearToken" type="button">Clear Token</button>
     </div>
-    <button id="googleSignInBtn" style="display:none;">Sign in with Google</button>
+    <button id="googleSignInBtn" data-i18n="signInGoogle" style="display:none;">Sign in with Google</button>
   </details>
   <div class="form-group">
-    <label for="commit">Commit SHA or Branch (optional):</label>
-    <input type="text" id="commit" placeholder="e.g., main or a1b2c3d">
+    <label for="commit" data-i18n="commitRef">Commit SHA or Branch (optional):</label>
+    <input type="text" id="commit" data-i18n-placeholder="commitPlaceholder" placeholder="e.g., main or a1b2c3d">
     <select id="commitDropdown"></select>
   </div>
 
   <div class="checkbox-group">
-    <label>Include in Summary:</label>
+    <label data-i18n="includeInSummary">Include in Summary:</label>
     <label for="includeContent">
       <input type="checkbox" id="includeContent" checked>
-      File Names and Content
+      <span data-i18n="includeContent">File Names and Content</span>
     </label>
     <label for="includeTree">
       <input type="checkbox" id="includeTree" checked>
-      Directory Tree Structure
+      <span data-i18n="includeTree">Directory Tree Structure</span>
     </label>
   </div>
 
-  <button id="summarizeBtn">Summarize Repository</button>
+  <button id="summarizeBtn" data-i18n="summarizeRepo">Summarize Repository</button>
 
   <div id="status" style="display:none;"></div>
   <div id="error" style="display:none;"></div>
 
   <div class="loading" id="loading" style="display:none;">
-    <img src="spinner.gif" alt="Loading">
-    <span>Processing...</span>
+    <img src="spinner.gif" data-i18n-alt="loading" alt="Loading">
+    <span data-i18n="processing">Processing...</span>
   </div>
 
   <div id="downloadLink" style="display:none;">
     <a href="#" id="downloadFileLink">Download Combined File</a>
   </div>
 
-  <button id="copySummaryBtn" style="display:none;">Copy Summary to Clipboard</button>
+  <button id="copySummaryBtn" data-i18n="copySummary" style="display:none;">Copy Summary to Clipboard</button>
 
   <div id="fileSize" class="info-display" style="display:none;"></div>
   <div id="tokenCount" class="info-display" style="display:none;"></div>
@@ -466,28 +480,29 @@
   <div id="summaryPreview" style="display:none;"></div>
 
   <div id="starPrompt">
-    <p>If you enjoy this extension, please consider starring the project on GitHub.</p>
-    <button id="starRepoBtn">Star on GitHub</button>
-    <button id="dismissStarPromptBtn">Dismiss</button>
+    <p data-i18n="starPrompt">If you enjoy this extension, please consider starring the project on GitHub.</p>
+    <button id="starRepoBtn" data-i18n="starGitHub">Star on GitHub</button>
+    <button id="dismissStarPromptBtn" data-i18n="dismiss">Dismiss</button>
   </div>
 
   <!-- Feedback Section -->
   <div id="feedbackSection">
-    <h3>We Value Your Feedback!</h3>
-    <a href="https://chromewebstore.google.com/detail/github-repo-summarizer/ccikgbjalcbokaalidnfcjhhbhjoljfm" target="_blank">
+    <h3 data-i18n="feedbackHeading">We Value Your Feedback!</h3>
+    <a data-i18n="starStore" href="https://chromewebstore.google.com/detail/github-repo-summarizer/ccikgbjalcbokaalidnfcjhhbhjoljfm" target="_blank">
       Star on Chrome Web Store
     </a>
     <div class="form-group">
-      <textarea id="feedback" placeholder="Tell us what features you'd like to see or what you don't like..."></textarea>
+      <textarea id="feedback" data-i18n-placeholder="feedbackPlaceholder" placeholder="Tell us what features you'd like to see or what you don't like..."></textarea>
     </div>
 
-    <button id="submitFeedbackBtn">Submit Feedback</button>
+    <button id="submitFeedbackBtn" data-i18n="submitFeedback">Submit Feedback</button>
   </div>
 
 
   <!-- App Version Display -->
   <div id="appVersion">Version: Loading...</div>
 
+  <script src="popup-i18n.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

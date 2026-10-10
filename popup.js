@@ -71,6 +71,9 @@ function escapeRegExp(string) {
 let latestSummary = '';
 
 document.addEventListener('DOMContentLoaded', () => {
+  localizePopup();
+  updateSelectedCount();
+  document.getElementById('downloadFileLink').textContent = popupMessage('downloadCombinedFile', 'Download Combined File');
   initializeExtension();
   document.getElementById('summarizeBtn').addEventListener('click', processRepo);
   document.getElementById('advancedSettingsBtn').addEventListener('click', toggleAdvancedSettings);
@@ -242,12 +245,15 @@ function saveSettings() {
  */
 function toggleAdvancedSettings() {
   const advancedSettings = document.getElementById('advancedSettings');
+  const button = document.getElementById('advancedSettingsBtn');
   if (advancedSettings.style.display === 'none' || advancedSettings.style.display === '') {
     advancedSettings.style.display = 'block';
-    document.getElementById('advancedSettingsBtn').textContent = 'Hide Advanced Settings';
+    button.dataset.i18n = 'hideAdvancedSettings';
+    button.textContent = popupMessage('hideAdvancedSettings', 'Hide Advanced Settings');
   } else {
     advancedSettings.style.display = 'none';
-    document.getElementById('advancedSettingsBtn').textContent = 'Advanced Settings';
+    button.dataset.i18n = 'advancedSettings';
+    button.textContent = popupMessage('advancedSettings', 'Advanced Settings');
   }
 }
 
@@ -310,7 +316,7 @@ function starRepo() {
     }
   }).then(resp => {
     if (resp.status === 204) {
-      alert('Repository starred! Thank you.');
+      alert(popupMessage('repoStarred', 'Repository starred! Thank you.'));
     } else {
       chrome.tabs.create({ url: repoUrl });
     }
@@ -347,16 +353,16 @@ async function displayRepoSize() {
     const repoInfo = await getRepoInfoFromCurrentTab();
     if (repoInfo) {
       const repoSizeMB = await getRepoSize(repoInfo.owner, repoInfo.repo);
-      repoSizeEl.textContent = `Repo Size: ${repoSizeMB.toFixed(2)} MB`;
+      repoSizeEl.textContent = popupMessage('repoSizeMessage', 'Repo Size: $1 MB', [repoSizeMB.toFixed(2)]);
       repoSizeEl.style.display = 'block'; // Show the repo size once it's fetched
       loadingEl.style.display = 'none'; // Hide the loading spinner
     } else {
-      throw new Error('Unable to retrieve repository information.');
+      throw new Error(popupMessage('repoInfoError', 'Unable to retrieve repository information.'));
     }
   } catch (error) {
     console.error('Error fetching repository size:', error);
     loadingEl.style.display = 'none';
-    errorEl.textContent = 'Error fetching repository size.';
+    errorEl.textContent = popupMessage('repoSizeError', 'Error fetching repository size.');
     errorEl.style.display = 'block';
   }
 }
@@ -385,9 +391,9 @@ async function preScanRepo() {
   const directoriesContainerEl = document.getElementById('directoriesContainer');
   const selectedCountEl = document.getElementById('selectedCount');
   errorEl.style.display = 'none';
-  availableExtensionsEl.innerHTML = 'Scanning...';
-  directoriesContainerEl.innerHTML = 'Scanning...';
-  selectedCountEl.textContent = 'Selected: 0';
+  availableExtensionsEl.textContent = popupMessage('scanning', 'Scanning...');
+  directoriesContainerEl.textContent = popupMessage('scanning', 'Scanning...');
+  selectedCountEl.textContent = popupMessage('selectedCount', 'Selected: $1', ['0']);
 
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
@@ -451,14 +457,16 @@ async function preScanRepo() {
           checkbox.type = 'checkbox';
           checkbox.className = 'extension-checkbox';
           checkbox.value = ext;
-          checkbox.style.marginRight = '10px';
+          checkbox.style.marginInlineEnd = '10px';
           checkbox.style.width = '16px';
           checkbox.style.height = '16px';
 
           // Pre-select top extensions by default
           checkbox.checked = topExtensions.includes(ext);
 
-          const textNode = document.createTextNode(`${ext} (${extensionCounts[ext]})`);
+          const textNode = document.createElement('bdi');
+          textNode.dir = 'ltr';
+          textNode.textContent = `${ext} (${extensionCounts[ext]})`;
           if (topExtensions.includes(ext)) {
             // Highlight top extensions
             // Using a bullet or similar marker for highlighting
@@ -494,7 +502,10 @@ async function preScanRepo() {
             checkbox.checked = true; // All directories checked by default
 
             label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(' ' + (dir === '/' ? 'Root Directory (/)': dir)));
+            const name = document.createElement('bdi');
+            name.textContent = dir === '/' ? popupMessage('rootDirectory', 'Root Directory (/)') : dir;
+            if (dir !== '/') name.dir = 'ltr';
+            label.appendChild(name);
 
             directoriesContainerEl.appendChild(label);
           });
@@ -503,11 +514,13 @@ async function preScanRepo() {
           updateSelectedCount();
         } else {
           // If no directories, inform the user and hide the directories selection
-          directoriesContainerEl.innerHTML = '<em>No directories found. All files with specified extensions will be included.</em>';
+          const emptyMessage = document.createElement('em');
+          emptyMessage.textContent = popupMessage('noDirectories', 'No directories found. All files with specified extensions will be included.');
+          directoriesContainerEl.replaceChildren(emptyMessage);
           document.getElementById('selectAllContainer').style.display = 'none';
           document.getElementById('directorySearch').style.display = 'none';
           document.getElementById('clearSelectionBtn').style.display = 'none';
-          selectedCountEl.textContent = 'Selected: 0';
+          selectedCountEl.textContent = popupMessage('selectedCount', 'Selected: $1', ['0']);
         }
 
         // After populating extensions and directories, update the main extensions field
@@ -518,8 +531,8 @@ async function preScanRepo() {
 
       } catch (error) {
         console.error('Error during pre-scan:', error);
-        availableExtensionsEl.innerHTML = 'Error fetching extensions.';
-        directoriesContainerEl.innerHTML = 'Error fetching directories.';
+        availableExtensionsEl.textContent = popupMessage('extensionsError', 'Error fetching extensions.');
+        directoriesContainerEl.textContent = popupMessage('directoriesError', 'Error fetching directories.');
         displayError(error.message);
       }
     } // End of if (repoInfo)
@@ -640,7 +653,7 @@ async function fetchRecentCommits(owner, repo, limit = 10) {
   const response = await fetchWithToken(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=${limit}`);
   const data = await response.json();
   if (!Array.isArray(data)) {
-    throw new Error('Unable to fetch commits');
+    throw new Error(popupMessage('commitsError', 'Unable to fetch commits'));
   }
   return data;
 }
@@ -649,17 +662,17 @@ async function fetchRecentCommits(owner, repo, limit = 10) {
 async function populateCommitDropdown() {
   const dropdown = document.getElementById('commitDropdown');
   if (!dropdown) return;
-  dropdown.innerHTML = '<option>Loading commits...</option>';
+  setCommitDropdownMessage(dropdown, popupMessage('loadingCommits', 'Loading commits...'));
   chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     const tab = tabs[0];
     const repoInfo = getRepoInfoFromURL(tab.url);
     if (!repoInfo) {
-      dropdown.innerHTML = '<option>No repo detected</option>';
+      setCommitDropdownMessage(dropdown, popupMessage('noRepoDetected', 'No repo detected'));
       return;
     }
     try {
       const commits = await fetchRecentCommits(repoInfo.owner, repoInfo.repo);
-      dropdown.innerHTML = '<option value="">Latest</option>';
+      setCommitDropdownMessage(dropdown, popupMessage('latestCommit', 'Latest'));
       commits.forEach(commit => {
         const sha = commit.sha;
         const message = commit.commit && commit.commit.message ? commit.commit.message.split('\n')[0] : sha;
@@ -670,7 +683,7 @@ async function populateCommitDropdown() {
       });
     } catch (err) {
       console.error(err);
-      dropdown.innerHTML = '<option>Error loading commits</option>';
+      setCommitDropdownMessage(dropdown, popupMessage('loadingCommitsError', 'Error loading commits'));
     }
   });
 
@@ -679,6 +692,12 @@ async function populateCommitDropdown() {
   });
 }
 
+function setCommitDropdownMessage(dropdown, message) {
+  const option = document.createElement('option');
+  option.value = '';
+  option.textContent = message;
+  dropdown.replaceChildren(option);
+}
 
 /**
  * Process the repository: fetch files, summarize, and prepare the download.
@@ -719,7 +738,7 @@ async function processRepo() {
 
         // Fetch repository size and display it
         const repoSizeMB = await getRepoSize(repoInfo.owner, repoInfo.repo);
-        document.getElementById('repoSize').textContent = `Repository size: ${repoSizeMB.toFixed(2)} MB`;
+        document.getElementById('repoSize').textContent = popupMessage('repoSizeMessage', 'Repo Size: $1 MB', [repoSizeMB.toFixed(2)]);
 
         // Extract directories
         const directories = extractDirectories(files);
@@ -728,7 +747,7 @@ async function processRepo() {
         if (directories.length > 0) {
           selectedDirectories = getSelectedDirectories();
           if (selectedDirectories.length === 0) {
-            throw new Error('Please select at least one directory to include in the summary.');
+            throw new Error(popupMessage('selectDirectoryError', 'Please select at least one directory to include in the summary.'));
           }
         } else {
           // No directories found; include all files with specified extensions
@@ -746,7 +765,7 @@ async function processRepo() {
         extensions = extensions.filter(ext => ext.toLowerCase() !== 'no extension');
 
         if (extensions.length === 0) {
-          throw new Error('Please specify at least one file extension.');
+          throw new Error(popupMessage('selectExtensionError', 'Please specify at least one file extension.'));
         }
 
         
@@ -768,7 +787,7 @@ async function processRepo() {
         if (largeFiles.length > 0) {
           // Allow user to exclude large files
           const proceed = confirm(
-            `There are ${largeFiles.length} large files. Do you want to proceed with these files included?`
+            popupMessage('largeFilesConfirm', 'There are $1 large files. Do you want to proceed with these files included?', [largeFiles.length])
           );
           if (!proceed) {
             // Exclude large files
@@ -793,22 +812,22 @@ async function processRepo() {
         }
 
         if (!finalContent) {
-          finalContent = 'No content selected to include in the summary.';
+          finalContent = popupMessage('noContentSelected', 'No content selected to include in the summary.');
         }
 
         createDownloadableFile(finalContent, repoInfo.repo);
         loadingEl.style.display = 'none';
-        displayStatus('File ready for download.');
+        displayStatus(popupMessage('fileReady', 'File ready for download.'));
         downloadLinkContainer.style.display = 'block';
 
         // Display file size
         const fileSizeInKB = (new Blob([finalContent]).size / 1024).toFixed(2);
-        fileSizeEl.textContent = `File Size: ${fileSizeInKB} KB`;
+        fileSizeEl.textContent = popupMessage('fileSizeMessage', 'File Size: $1 KB', [fileSizeInKB]);
         fileSizeEl.style.display = 'block';
 
         // Calculate and display token count
         const estimatedTokens = estimateTokenCount(finalContent);
-        tokenCountEl.textContent = `Estimated Token Count: ${estimatedTokens}`;
+        tokenCountEl.textContent = popupMessage('tokenCountMessage', 'Estimated Token Count: $1', [estimatedTokens]);
         tokenCountEl.style.display = 'block';
 
         if (skippedFiles && skippedFiles.length > 0) {
@@ -856,7 +875,7 @@ async function processRepo() {
       }
     } else {
       loadingEl.style.display = 'none';
-      displayError('Not on a valid GitHub repository page.');
+      displayError(popupMessage('invalidRepoPage', 'Not on a valid GitHub repository page.'));
     }
   });
 }
@@ -890,15 +909,15 @@ function fetchWithToken(url) {
       if (response.status === 403) {
         return response.json().then(data => {
           if (data && data.message && data.message.includes('API rate limit exceeded')) {
-            throw new Error('GitHub API rate limit exceeded. Please enter a valid GitHub token. Get one from https://github.com/settings/tokens');
+            throw new Error(popupMessage('rateLimitError', 'GitHub API rate limit exceeded. Please enter a valid GitHub token. Get one from https://github.com/settings/tokens'));
           } else {
-            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+            throw new Error(popupMessage('apiError', 'GitHub API error: $1 $2', [response.status, response.statusText]));
           }
         });
       } else if (response.status === 401) {
-        throw new Error('Invalid GitHub token provided.');
+        throw new Error(popupMessage('invalidTokenError', 'Invalid GitHub token provided.'));
       } else if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+        throw new Error(popupMessage('apiError', 'GitHub API error: $1 $2', [response.status, response.statusText]));
       }
       return response;
     });
@@ -923,16 +942,16 @@ function fetchRepoTree(owner, repo, ref) {
     .then(response => response.json())
     .then(treeData => {
       if (treeData.truncated) {
-        throw new Error('Repository tree is too large to fetch.');
+        throw new Error(popupMessage('treeTooLargeError', 'Repository tree is too large to fetch.'));
       }
       if (!treeData.tree || !Array.isArray(treeData.tree)) {
-        throw new Error('Unexpected data format received from GitHub API.');
+        throw new Error(popupMessage('treeFormatError', 'Unexpected data format received from GitHub API.'));
       }
       return treeData.tree;
     })
     .catch(error => {
       if (error.message.includes('404')) {
-        throw new Error('Repository not found or is private.');
+        throw new Error(popupMessage('repoNotFoundError', 'Repository not found or is private.'));
       } else {
         throw error;
       }
@@ -948,7 +967,7 @@ function fetchRepoTree(owner, repo, ref) {
  */
 function filterCodeFiles(files, extensions, selectedDirectories) {
   if (!files || !Array.isArray(files)) {
-    throw new Error('No files found in the repository.');
+      throw new Error(popupMessage('noFilesError', 'No files found in the repository.'));
   }
   return files.filter(item => {
     // Check if the file is a blob (file)
@@ -1073,7 +1092,7 @@ function fetchFilesContent(files, maxChars, owner, repo, ref) {
  */
 function buildCombinedContent(filesContent) {
   if (!filesContent || !Array.isArray(filesContent)) {
-    throw new Error('No file contents available.');
+    throw new Error(popupMessage('noFileContentsError', 'No file contents available.'));
   }
   let combinedContent = '';
   filesContent.forEach(file => {
@@ -1123,17 +1142,17 @@ function createDownloadableFile(content, repoName) {
   const downloadFileLink = document.getElementById('downloadFileLink');
   downloadFileLink.href = url;
   downloadFileLink.download = `${repoName}-code-summary.txt`;
-  downloadFileLink.textContent = `Download ${repoName} Code Summary`;
+  downloadFileLink.textContent = popupMessage('downloadNamedSummary', 'Download $1 Code Summary', [repoName]);
 }
 
 function copySummaryToClipboard() {
   if (!latestSummary) {
-    displayError('No summary available to copy.');
+    displayError(popupMessage('noSummaryToCopy', 'No summary available to copy.'));
     return;
   }
   navigator.clipboard.writeText(latestSummary)
     .then(() => {
-      displayStatus('Summary copied to clipboard.');
+      displayStatus(popupMessage('summaryCopied', 'Summary copied to clipboard.'));
       const statusEl = document.getElementById('status');
       statusEl.classList.add('highlight');
       statusEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1144,7 +1163,7 @@ function copySummaryToClipboard() {
     })
     .catch(err => {
       console.error('Clipboard copy failed:', err);
-      displayError('Failed to copy summary to clipboard.');
+      displayError(popupMessage('copyFailed', 'Failed to copy summary to clipboard.'));
     });
 }
 
@@ -1166,7 +1185,7 @@ function estimateTokenCount(text) {
 async function submitFeedback() {
   const feedbackText = document.getElementById('feedback').value.trim();
   if (!feedbackText) {
-    alert('Please enter your feedback before submitting.');
+    alert(popupMessage('feedbackEmpty', 'Please enter your feedback before submitting.'));
     return;
   }
 
@@ -1175,7 +1194,7 @@ async function submitFeedback() {
   
   // Validate email format (basic validation)
   if (!validateEmail(yourEmail)) {
-    alert('Feedback submission failed: Invalid email address configured.');
+    alert(popupMessage('feedbackEmailError', 'Feedback submission failed: Invalid email address configured.'));
     return;
   }
 
@@ -1191,7 +1210,7 @@ async function submitFeedback() {
   // Clear the feedback field after submission
   document.getElementById('feedback').value = '';
 
-  alert('Thank you for your feedback!');
+  alert(popupMessage('feedbackThanks', 'Thank you for your feedback!'));
 }
 
 /**
@@ -1211,7 +1230,7 @@ function displayAppVersion() {
   const versionEl = document.getElementById('appVersion');
   if (versionEl) {
     const manifestData = chrome.runtime.getManifest();
-    versionEl.textContent = `Version: ${manifestData.version}`;
+    versionEl.textContent = popupMessage('versionMessage', 'Version: $1', [manifestData.version]);
   }
 }
 
@@ -1221,7 +1240,7 @@ function displayAppVersion() {
 function updateSelectedCount() {
   const selectedCountEl = document.getElementById('selectedCount');
   const selected = getSelectedDirectories().length;
-  selectedCountEl.textContent = `Selected: ${selected}`;
+  selectedCountEl.textContent = popupMessage('selectedCount', 'Selected: $1', [selected]);
 }
 
 /**
@@ -1334,7 +1353,7 @@ function signInWithGoogle() {
       document.getElementById('token').value = response.token;
       saveToken(response.token);
     } else if (response && response.error) {
-      displayError('OAuth failed: ' + response.error);
+      displayError(popupMessage('oauthError', 'OAuth failed: $1', [response.error]));
     }
   });
 }
